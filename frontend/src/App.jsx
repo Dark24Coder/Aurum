@@ -5,26 +5,32 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import "./index.css";
 
+// Context & Guards
+import { AuthProvider } from "./context/AuthProvider";
+import ProtectedRoute from "./components/shared/ProtectedRoute";
+
+// Layouts & UI
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import AIChat from "./components/shared/AIChat";
 
+// Pages
 import Home from "./pages/Home";
 import Sourcing from "./pages/Sourcing";
 import Marketplace from "./pages/Marketplace";
 import Groupage from "./pages/Groupage";
-import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
-import ProtectedRoute from "./components/shared/ProtectedRoute";
+// Dashboard
+import UserLayout from "./pages/dashboard/user/UserLayout";
+import AdminLayout from "./pages/dashboard/admin/AdminLayout";
 
-function AnimatedRoutes({ currentUser, setCurrentUser, logout }) {
+function AnimatedRoutes() {
   const location = useLocation();
 
   return (
@@ -37,29 +43,42 @@ function AnimatedRoutes({ currentUser, setCurrentUser, logout }) {
         transition={{ duration: 0.4, ease: "easeInOut" }}
       >
         <Routes location={location}>
-          {/* Routes Publiques */}
+          {/* --- Routes Publiques --- */}
           <Route path="/" element={<Home />} />
-          <Route
-            path="/sourcing"
-            element={<Sourcing currentUser={currentUser} />}
-          />
+          <Route path="/sourcing" element={<Sourcing />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/groupage" element={<Groupage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* --- Dashboard User ---
+              ✅ FIX : chaque route est indépendante avec son propre ProtectedRoute.
+              Plus de parent/enfant avec DashboardGuard qui bloquait l'affichage.
+          */}
           <Route
-            path="/login"
-            element={<Login setCurrentUser={setCurrentUser} />}
+            path="/dashboard/user"
+            element={
+              <ProtectedRoute role="CLIENT">
+                <UserLayout />
+              </ProtectedRoute>
+            }
           />
           <Route
-            path="/register"
-            element={<Register setCurrentUser={setCurrentUser} />}
+            path="/dashboard/admin"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
           />
 
-          {/* Route Protégée */}
+          {/* --- Fallback /dashboard → redirection selon rôle --- */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute user={currentUser}>
-                <Dashboard currentUser={currentUser} logout={logout} />
+              <ProtectedRoute>
+                {/* DashboardGuard navigue vers /dashboard/user ou /dashboard/admin */}
+                <DashboardRedirect />
               </ProtectedRoute>
             }
           />
@@ -69,28 +88,31 @@ function AnimatedRoutes({ currentUser, setCurrentUser, logout }) {
   );
 }
 
-function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-
-  const logout = () => setCurrentUser(null);
-
+// Petit composant de redirection inline — évite d'importer DashboardGuard
+function DashboardRedirect() {
+  // eslint-disable-next-line no-undef
+  const { isAdmin } = require("./context/useAuth").useAuth();
+  // eslint-disable-next-line no-undef
+  const { Navigate } = require("react-router-dom");
   return (
-    <Router>
-      <div className="min-h-screen bg-[#0A0A0B] text-white selection:bg-[#D4AF37]/30">
-        <Navbar currentUser={currentUser} logout={logout} />
+    <Navigate to={isAdmin ? "/dashboard/admin" : "/dashboard/user"} replace />
+  );
+}
 
-        <main className="pt-20">
-          <AnimatedRoutes
-            currentUser={currentUser}
-            setCurrentUser={setCurrentUser}
-            logout={logout}
-          />
-        </main>
-
-        <Footer />
-        <AIChat />
-      </div>
-    </Router>
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-[#0A0A0B] text-white selection:bg-[#D4AF37]/30">
+          <Navbar />
+          <main className="pt-20">
+            <AnimatedRoutes />
+          </main>
+          <Footer />
+          <AIChat />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
