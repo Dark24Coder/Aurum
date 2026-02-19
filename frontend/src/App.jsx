@@ -27,7 +27,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 // Dashboard
-import UserLayout from "./pages/dashboard/user/UserLayout";
+import UserLayout from "./pages/dashboard/user/UserLayout.jsx";
 import AdminLayout from "./pages/dashboard/admin/AdminLayout";
 
 function AnimatedRoutes() {
