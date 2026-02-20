@@ -12,7 +12,6 @@ import {
   Package,
   Zap,
   ShieldCheck,
-  Laptop,
   Smartphone,
   AlertTriangle,
   Plane,
@@ -25,7 +24,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// ── DONNÉES ───────────────────────────────────────────────────────────────────
 const SERVICES_DATA = [
   {
     title: "Sourcing Chine",
@@ -47,7 +45,7 @@ const SERVICES_DATA = [
   },
   {
     title: "Sécurité Totale",
-    desc: "Vos fonds et vos marchandises sont protégés par l'Aurum Protocol.",
+    desc: "Vos fonds et marchandises sont protégés par l'Aurum Protocol.",
     icon: <ShieldCheck className="text-[#D4AF37]" size={24} />,
     tag: "Confiance",
   },
@@ -162,7 +160,6 @@ const fmt = (n) =>
     n,
   );
 
-// ── STYLES ────────────────────────────────────────────────────────────────────
 const AnimStyles = () => (
   <style>{`
     @keyframes overlayIn   { from{opacity:0} to{opacity:1} }
@@ -172,14 +169,12 @@ const AnimStyles = () => (
     @keyframes dropIn      { from{opacity:0;transform:translateY(-6px) scaleY(0.95)} to{opacity:1;transform:translateY(0) scaleY(1)} }
     @keyframes fadeSlideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     @keyframes autoScroll  { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-
-    .anim-overlay { animation: overlayIn   0.22s ease forwards; }
-    .anim-modal   { animation: modalPop    0.32s cubic-bezier(0.34,1.4,0.64,1) forwards; }
-    .anim-fade-up { animation: fadeUp      0.28s ease forwards; }
-    .anim-tab     { animation: tabFade     0.20s ease forwards; }
-    .anim-drop    { animation: dropIn      0.22s cubic-bezier(0.22,1,0.36,1) forwards; transform-origin:top; }
-    .anim-hero    { animation: fadeSlideIn 0.6s ease-out forwards; }
-
+    .anim-overlay { animation:overlayIn   0.22s ease forwards; }
+    .anim-modal   { animation:modalPop    0.32s cubic-bezier(0.34,1.4,0.64,1) forwards; }
+    .anim-fade-up { animation:fadeUp      0.28s ease forwards; }
+    .anim-tab     { animation:tabFade     0.20s ease forwards; }
+    .anim-drop    { animation:dropIn      0.22s cubic-bezier(0.22,1,0.36,1) forwards; transform-origin:top; }
+    .anim-hero    { animation:fadeSlideIn 0.6s ease-out forwards; }
     .slider-track { display:flex; width:max-content; animation:autoScroll 60s linear infinite; will-change:transform; }
     .slider-track:hover { animation-play-state:paused; }
     .slider-wrapper {
@@ -209,7 +204,6 @@ function FloatInput({
   const isFloating =
     focused ||
     (value !== undefined && value !== null && String(value).length > 0);
-
   return (
     <div className="relative">
       <div
@@ -253,9 +247,9 @@ function FloatInput({
   );
 }
 
-// ── FLOAT SELECT — Portal ─────────────────────────────────────────────────────
-// scrollContainerRef : ref du div scrollable parent (passé par le modal)
-// pour que le dropdown se repositionne quand le modal scrolle
+// ── FLOAT SELECT — Portal (dropdown rendu sur document.body) ──────────────────
+// ⚠️ NE PAS wrapper ce composant dans un FadePanel avec key dynamique
+// car cela détruit/recrée le DOM et la ref triggerRef devient null
 function FloatSelect({
   label,
   value,
@@ -274,7 +268,6 @@ function FloatSelect({
   const isFloating = focused || open || (value && value.length > 0);
   const selectedLabel = options.find((o) => o.value === value)?.label || "";
 
-  // Fermer si clic en dehors
   useEffect(() => {
     const h = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) {
@@ -286,48 +279,36 @@ function FloatSelect({
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  // ✅ FIX SCROLL : écoute aussi le scroll du conteneur modal
-  useEffect(() => {
-    if (!open) return;
-
-    const update = () => {
-      if (triggerRef.current) {
-        const r = triggerRef.current.getBoundingClientRect();
-        setPos({ top: r.bottom + 6, left: r.left, width: r.width });
-      }
-    };
-
-    update();
-
-    // Écoute le scroll global ET le scroll du modal
-    window.addEventListener("scroll", update, true);
-    window.addEventListener("resize", update);
-
-    // ✅ Écoute le scroll du div modal passé en prop
-    const scrollEl = scrollContainerRef?.current;
-    if (scrollEl) scrollEl.addEventListener("scroll", update);
-
-    return () => {
-      window.removeEventListener("scroll", update, true);
-      window.removeEventListener("resize", update);
-      if (scrollEl) scrollEl.removeEventListener("scroll", update);
-    };
-  }, [open, scrollContainerRef]);
-
-  const handleOpen = () => {
+  const updatePos = () => {
     if (triggerRef.current) {
       const r = triggerRef.current.getBoundingClientRect();
       setPos({ top: r.bottom + 6, left: r.left, width: r.width });
     }
-    setOpen((v) => !v);
-    setFocused(true);
   };
+
+  useEffect(() => {
+    if (!open) return;
+    updatePos();
+    window.addEventListener("scroll", updatePos, true);
+    window.addEventListener("resize", updatePos);
+    const el = scrollContainerRef?.current;
+    if (el) el.addEventListener("scroll", updatePos);
+    return () => {
+      window.removeEventListener("scroll", updatePos, true);
+      window.removeEventListener("resize", updatePos);
+      if (el) el.removeEventListener("scroll", updatePos);
+    };
+  }, [open, scrollContainerRef]);
 
   return (
     <div className="relative" ref={wrapRef}>
       <div
         ref={triggerRef}
-        onClick={handleOpen}
+        onClick={() => {
+          updatePos();
+          setOpen((v) => !v);
+          setFocused(true);
+        }}
         className={`relative flex items-center bg-black/40 border rounded-xl cursor-pointer transition-all duration-300 ${open ? "border-[#D4AF37]/60 shadow-[0_0_15px_rgba(212,175,55,0.08)]" : "border-white/10"}`}
       >
         {Icon && (
@@ -350,7 +331,6 @@ function FloatSelect({
           />
         </div>
       </div>
-
       <label
         className={`absolute pointer-events-none font-bold uppercase tracking-[0.15em] transition-all duration-300 ${
           isFloating
@@ -365,15 +345,15 @@ function FloatSelect({
       {open &&
         ReactDOM.createPortal(
           <div
-            className="fixed anim-drop"
             style={{
+              position: "fixed",
               top: pos.top,
               left: pos.left,
               width: pos.width,
               zIndex: 9999,
             }}
           >
-            <div className="bg-[#111112] border border-[#D4AF37]/20 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.85)]">
+            <div className="bg-[#111112] border border-[#D4AF37]/20 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.85)] anim-drop">
               <div className="max-h-52 overflow-y-auto custom-scroll">
                 {options.map((opt) => (
                   <div
@@ -396,7 +376,6 @@ function FloatSelect({
           </div>,
           document.body,
         )}
-
       <input
         tabIndex="-1"
         className="absolute opacity-0 pointer-events-none w-full bottom-0"
@@ -408,7 +387,6 @@ function FloatSelect({
   );
 }
 
-// ── COMPOSANTS UI ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const c = {
     LIVRE: "bg-green-500/20 text-green-400 border border-green-500/20",
@@ -426,12 +404,6 @@ const StatusBadge = ({ status }) => {
     </span>
   );
 };
-
-const FadePanel = ({ animKey, children }) => (
-  <div key={animKey} className="anim-tab">
-    {children}
-  </div>
-);
 
 const ServiceCard = ({ service }) => (
   <div className="min-w-[280px] sm:min-w-[320px] group relative p-8 rounded-[2.5rem] bg-[#111112] border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-500 overflow-hidden mx-3">
@@ -456,15 +428,12 @@ const ServiceCard = ({ service }) => (
   </div>
 );
 
-// ── HOME ──────────────────────────────────────────────────────────────────────
 export default function Home() {
-  // Suivi
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [result, setResult] = useState(null);
   const [searched, setSearched] = useState(false);
 
-  // Simulateur
   const [simOpen, setSimOpen] = useState(false);
   const [tab, setTab] = useState("calc");
   const [mode, setMode] = useState("AIR");
@@ -478,14 +447,12 @@ export default function Home() {
   });
   const [simResult, setSimResult] = useState(null);
 
-  // ✅ Ref du conteneur scrollable du modal simulateur
-  // Passée au FloatSelect pour qu'il se repositionne au scroll
+  // Ref du conteneur scrollable du modal simulateur — passée au FloatSelect
   const simScrollRef = useRef(null);
 
   const rate = SHIPPING_RATES.find((r) => r.id === category);
   const isUnit = rate?.unit === "Unité";
 
-  // Handlers suivi
   const handleTrack = () => {
     if (!search.trim()) return;
     const found = MOCK_ORDERS.find(
@@ -501,7 +468,6 @@ export default function Home() {
     setSearched(false);
   };
 
-  // Handlers simulateur
   const calculate = () => {
     const L = parseFloat(dims.length) || 0,
       W = parseFloat(dims.width) || 0,
@@ -556,7 +522,6 @@ export default function Home() {
     <div className="min-h-screen flex flex-col justify-start items-center text-center px-4 sm:px-6 pt-20 relative overflow-hidden">
       <AnimStyles />
 
-      {/* Glow */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] rounded-full -z-10 pointer-events-none"
         style={{
@@ -566,7 +531,6 @@ export default function Home() {
         }}
       />
 
-      {/* Badge */}
       <div className="badge-gold mb-8 sm:mb-10 anim-hero">
         <Sparkles size={11} />
         <span className="text-[10px] sm:text-[11px]">
@@ -574,13 +538,11 @@ export default function Home() {
         </span>
       </div>
 
-      {/* Titre */}
       <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-4 sm:mb-6 tracking-tighter leading-[0.88] uppercase max-w-5xl anim-hero">
         Importez sans <br />
         <span className="text-[#D4AF37]">Aucune Crainte.</span>
       </h1>
 
-      {/* Description */}
       <p className="text-gray-500 text-sm sm:text-base md:text-lg max-w-xl sm:max-w-2xl mb-10 sm:mb-14 font-medium leading-relaxed px-2 anim-hero">
         La solution facile pour vos imports Chine-Afrique : Achat, Groupage et
         Livraison à domicile.{" "}
@@ -589,7 +551,6 @@ export default function Home() {
         </span>
       </p>
 
-      {/* Boutons Hero */}
       <div className="flex flex-col sm:flex-row gap-3 relative z-10 w-full max-w-2xl px-2 mb-24 anim-hero">
         <Link
           to="/login"
@@ -622,7 +583,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Section services */}
       <div className="w-full mb-28">
         <div className="flex items-center justify-between mb-10 px-4 sm:px-8 max-w-6xl mx-auto">
           <h2 className="text-white font-black text-xl sm:text-2xl uppercase tracking-tighter italic text-left">
@@ -635,8 +595,8 @@ export default function Home() {
         </div>
         <div className="slider-wrapper w-full py-4">
           <div className="slider-track">
-            {loopedServices.map((service, idx) => (
-              <ServiceCard key={idx} service={service} />
+            {loopedServices.map((s, i) => (
+              <ServiceCard key={i} service={s} />
             ))}
           </div>
         </div>
@@ -664,12 +624,10 @@ export default function Home() {
                 <X size={18} />
               </button>
             </div>
-
             <div className="overflow-y-auto custom-scroll flex-1 p-4 sm:p-6 space-y-4">
               <p className="text-gray-500 text-[11px] sm:text-xs">
                 Entrez votre numéro de suivi interne ou l'ID de commande
               </p>
-
               <FloatInput
                 label="Ex : BJ-TRK-889 ou CMD-2401-001"
                 value={search}
@@ -685,7 +643,6 @@ export default function Home() {
                   </button>
                 }
               />
-
               <div className="flex gap-2 flex-wrap items-center">
                 <span className="text-[9px] text-gray-600 uppercase font-bold">
                   Essayer :
@@ -700,7 +657,6 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-
               {result && result !== "NOT_FOUND" && (
                 <div className="bg-white/3 border border-white/5 rounded-2xl p-4 sm:p-5 anim-fade-up space-y-4">
                   <div className="flex justify-between items-start gap-3">
@@ -737,9 +693,9 @@ export default function Home() {
                   </div>
                   <div>
                     {TRACKING_STEPS.map((step, i) => {
-                      const StepIcon = step.Icon;
-                      const active = step.statuses.includes(result.status);
-                      const last = i === TRACKING_STEPS.length - 1;
+                      const StepIcon = step.Icon,
+                        active = step.statuses.includes(result.status),
+                        last = i === TRACKING_STEPS.length - 1;
                       return (
                         <div key={i} className="flex gap-3">
                           <div className="flex flex-col items-center flex-shrink-0">
@@ -765,7 +721,6 @@ export default function Home() {
                   </div>
                 </div>
               )}
-
               {searched && result === "NOT_FOUND" && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 anim-fade-up">
                   <div className="text-red-400 font-black text-[10px] uppercase tracking-widest mb-1">
@@ -781,7 +736,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* ═══ MODAL SIMULATEUR ══════════════════════════════════════════════ */}
+      {/* ═══ MODAL SIMULATEUR ══════════════════════════════════════════════
+          ⚠️ FIX CRITIQUE : le FloatSelect N'EST PAS dans un FadePanel.
+          Un FadePanel avec key dynamique recrée le DOM à chaque re-render,
+          ce qui détruit triggerRef et fait buguer le positionnement du dropdown.
+          Solution : onglet "calc" = un seul div.anim-tab stable, pas de FadePanel imbriqué.
+      ══════════════════════════════════════════════════════════════════════ */}
       {simOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 anim-overlay"
@@ -804,7 +764,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Onglets */}
             <div className="flex border-b border-white/5 flex-shrink-0">
               {[
                 { id: "calc", label: "Calculer" },
@@ -821,215 +780,209 @@ export default function Home() {
               ))}
             </div>
 
-            {/* ✅ ref={simScrollRef} sur le div scrollable — transmis au FloatSelect */}
+            {/* Conteneur scrollable — ref transmise au FloatSelect */}
             <div
               className="overflow-y-auto custom-scroll flex-1"
               ref={simScrollRef}
             >
               <div className="p-4 sm:p-6">
+                {/* ── CALCULER : PAS de FadePanel imbriqué autour du FloatSelect ── */}
                 {tab === "calc" && (
-                  <FadePanel animKey="calc">
-                    <div className="space-y-4">
-                      {/* Toggle Aérien / Maritime */}
-                      <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 gap-1">
-                        {MODES.map((m) => (
-                          <button
-                            key={m.id}
-                            onClick={() => changeMode(m.id)}
-                            className={`flex-1 py-2.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all duration-300 ${mode === m.id ? "bg-[#D4AF37] text-black shadow-[0_0_14px_rgba(212,175,55,0.28)]" : "text-gray-400 hover:text-white"}`}
-                          >
-                            <m.ModeIcon size={12} /> {m.label}
-                          </button>
-                        ))}
-                      </div>
+                  <div className="anim-tab space-y-4">
+                    {/* Toggle mode */}
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 gap-1">
+                      {MODES.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => changeMode(m.id)}
+                          className={`flex-1 py-2.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all duration-300 ${mode === m.id ? "bg-[#D4AF37] text-black shadow-[0_0_14px_rgba(212,175,55,0.28)]" : "text-gray-400 hover:text-white"}`}
+                        >
+                          <m.ModeIcon size={12} /> {m.label}
+                        </button>
+                      ))}
+                    </div>
 
-                      <FadePanel animKey={`${mode}-${category}`}>
-                        <div className="space-y-4">
-                          {mode === "AIR" && (
-                            /* ✅ scrollContainerRef passé ici */
-                            <FloatSelect
-                              label="Catégorie de marchandise"
-                              value={category}
-                              onChange={(v) => {
-                                setCategory(v);
-                                setSimResult(null);
-                              }}
-                              options={categoryOptions}
-                              icon={Package}
-                              scrollContainerRef={simScrollRef}
-                            />
-                          )}
+                    {/* FloatSelect stable — pas dans un FadePanel */}
+                    {mode === "AIR" && (
+                      <FloatSelect
+                        label="Catégorie de marchandise"
+                        value={category}
+                        onChange={(v) => {
+                          setCategory(v);
+                          setSimResult(null);
+                        }}
+                        options={categoryOptions}
+                        icon={Package}
+                        scrollContainerRef={simScrollRef}
+                      />
+                    )}
 
-                          {mode === "AIR" && isUnit ? (
+                    {/* Inputs dynamiques selon catégorie/mode */}
+                    {mode === "AIR" && isUnit ? (
+                      <FloatInput
+                        label="Quantité"
+                        type="number"
+                        value={dims.quantity}
+                        onChange={(e) =>
+                          setDims({ ...dims, quantity: e.target.value })
+                        }
+                        icon={Smartphone}
+                      />
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                          {[
+                            { k: "length", l: "Long. (cm)" },
+                            { k: "width", l: "Larg. (cm)" },
+                            { k: "height", l: "Haut. (cm)" },
+                          ].map(({ k, l }) => (
                             <FloatInput
-                              label="Quantité"
+                              key={k}
+                              label={l}
                               type="number"
-                              value={dims.quantity}
+                              value={dims[k]}
                               onChange={(e) =>
-                                setDims({ ...dims, quantity: e.target.value })
+                                setDims({ ...dims, [k]: e.target.value })
                               }
-                              icon={Smartphone}
                             />
-                          ) : (
-                            <>
-                              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                                {[
-                                  { k: "length", l: "Long. (cm)" },
-                                  { k: "width", l: "Larg. (cm)" },
-                                  { k: "height", l: "Haut. (cm)" },
-                                ].map(({ k, l }) => (
-                                  <FloatInput
-                                    key={k}
-                                    label={l}
-                                    type="number"
-                                    value={dims[k]}
-                                    onChange={(e) =>
-                                      setDims({ ...dims, [k]: e.target.value })
-                                    }
-                                  />
-                                ))}
-                              </div>
-                              {mode === "AIR" && (
-                                <FloatInput
-                                  label="Poids réel (kg)"
-                                  type="number"
-                                  value={dims.weight}
-                                  onChange={(e) =>
-                                    setDims({ ...dims, weight: e.target.value })
-                                  }
-                                  icon={Package}
-                                />
-                              )}
-                            </>
-                          )}
+                          ))}
+                        </div>
+                        {mode === "AIR" && (
+                          <FloatInput
+                            label="Poids réel (kg)"
+                            type="number"
+                            value={dims.weight}
+                            onChange={(e) =>
+                              setDims({ ...dims, weight: e.target.value })
+                            }
+                            icon={Package}
+                          />
+                        )}
+                      </>
+                    )}
 
-                          <button
-                            onClick={calculate}
-                            className="w-full py-3.5 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-300 hover:opacity-90 hover:shadow-[0_0_22px_rgba(212,175,55,0.28)] active:scale-[0.98]"
-                            style={{ background: "#D4AF37", color: "#0A0A0B" }}
-                          >
-                            <Calculator size={14} /> Calculer
-                          </button>
+                    <button
+                      onClick={calculate}
+                      className="w-full py-3.5 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-300 hover:opacity-90 hover:shadow-[0_0_22px_rgba(212,175,55,0.28)] active:scale-[0.98]"
+                      style={{ background: "#D4AF37", color: "#0A0A0B" }}
+                    >
+                      <Calculator size={14} /> Calculer
+                    </button>
 
-                          {simResult && (
-                            <div className="bg-white/3 border border-white/5 rounded-2xl p-4 sm:p-5 anim-fade-up">
-                              <div className="text-center mb-3">
-                                <div className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">
-                                  Estimation transport
-                                </div>
-                                <div className="text-2xl sm:text-3xl font-black text-[#D4AF37]">
-                                  {fmt(simResult.cost)}
-                                </div>
-                              </div>
-                              <div className="border-t border-white/5 pt-3 space-y-1.5">
-                                <div className="flex justify-between items-center text-[10px] sm:text-xs">
-                                  <span className="text-gray-500">
-                                    Base de calcul
-                                  </span>
-                                  <span className="font-black text-white">
-                                    {simResult.label}
-                                  </span>
-                                </div>
-                                {simResult.sub && (
-                                  <div className="text-[9px] sm:text-[10px] text-gray-600 text-center">
-                                    {simResult.sub}
-                                  </div>
-                                )}
-                                <div className="text-[8px] sm:text-[9px] text-gray-600 text-center italic pt-1">
-                                  Hors frais de douane spécifiques
-                                </div>
-                              </div>
+                    {simResult && (
+                      <div className="bg-white/3 border border-white/5 rounded-2xl p-4 sm:p-5 anim-fade-up">
+                        <div className="text-center mb-3">
+                          <div className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">
+                            Estimation transport
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-[#D4AF37]">
+                            {fmt(simResult.cost)}
+                          </div>
+                        </div>
+                        <div className="border-t border-white/5 pt-3 space-y-1.5">
+                          <div className="flex justify-between items-center text-[10px] sm:text-xs">
+                            <span className="text-gray-500">
+                              Base de calcul
+                            </span>
+                            <span className="font-black text-white">
+                              {simResult.label}
+                            </span>
+                          </div>
+                          {simResult.sub && (
+                            <div className="text-[9px] sm:text-[10px] text-gray-600 text-center">
+                              {simResult.sub}
                             </div>
                           )}
+                          <div className="text-[8px] sm:text-[9px] text-gray-600 text-center italic pt-1">
+                            Hors frais de douane spécifiques
+                          </div>
                         </div>
-                      </FadePanel>
-                    </div>
-                  </FadePanel>
+                      </div>
+                    )}
+                  </div>
                 )}
 
+                {/* ── TARIFS ── */}
                 {tab === "rates" && (
-                  <FadePanel animKey="rates">
-                    <div className="space-y-2.5">
-                      <p className="text-[10px] sm:text-xs text-gray-500 mb-4">
-                        Tarifs en vigueur
-                      </p>
-                      {SHIPPING_RATES.map((r) => (
-                        <div
-                          key={r.id}
-                          className="flex items-center gap-3 bg-white/3 border border-white/5 hover:border-[#D4AF37]/25 rounded-xl px-3 sm:px-4 py-3 transition-all duration-300 group"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="text-xs sm:text-sm font-black text-white group-hover:text-[#D4AF37] transition-colors duration-300">
-                              {r.label}
-                            </div>
-                            <div className="text-[9px] sm:text-[10px] text-gray-500 truncate">
-                              {r.details}
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <div className="text-xs sm:text-sm font-black text-white">
-                              {fmt(r.price)}
-                            </div>
-                            <div className="text-[8px] sm:text-[9px] text-gray-500">
-                              / {r.unit}
-                            </div>
-                            <div className="text-[8px] sm:text-[9px] font-bold text-[#D4AF37]">
-                              {r.delay}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="flex items-center gap-3 py-1">
-                        <div className="flex-1 h-px bg-white/5" />
-                        <span className="text-[9px] text-gray-600 uppercase font-bold">
-                          Maritime
-                        </span>
-                        <div className="flex-1 h-px bg-white/5" />
-                      </div>
-                      <div className="flex items-center gap-3 bg-white/3 border border-white/5 hover:border-[#D4AF37]/25 rounded-xl px-3 sm:px-4 py-3 transition-all duration-300 group">
-                        <div className="text-[#D4AF37] flex-shrink-0">
-                          <Ship size={15} />
-                        </div>
+                  <div className="anim-tab space-y-2.5">
+                    <p className="text-[10px] sm:text-xs text-gray-500 mb-4">
+                      Tarifs en vigueur
+                    </p>
+                    {SHIPPING_RATES.map((r) => (
+                      <div
+                        key={r.id}
+                        className="flex items-center gap-3 bg-white/3 border border-white/5 hover:border-[#D4AF37]/25 rounded-xl px-3 sm:px-4 py-3 transition-all duration-300 group"
+                      >
                         <div className="flex-1 min-w-0">
                           <div className="text-xs sm:text-sm font-black text-white group-hover:text-[#D4AF37] transition-colors duration-300">
-                            Maritime
+                            {r.label}
                           </div>
                           <div className="text-[9px] sm:text-[10px] text-gray-500 truncate">
-                            Toutes marchandises (sauf téléphones/ordinateurs)
+                            {r.details}
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
                           <div className="text-xs sm:text-sm font-black text-white">
-                            {fmt(SEA_RATE_CBM)}
+                            {fmt(r.price)}
                           </div>
                           <div className="text-[8px] sm:text-[9px] text-gray-500">
-                            / CBM
+                            / {r.unit}
+                          </div>
+                          <div className="text-[8px] sm:text-[9px] font-bold text-[#D4AF37]">
+                            {r.delay}
                           </div>
                         </div>
                       </div>
+                    ))}
+                    <div className="flex items-center gap-3 py-1">
+                      <div className="flex-1 h-px bg-white/5" />
+                      <span className="text-[9px] text-gray-600 uppercase font-bold">
+                        Maritime
+                      </span>
+                      <div className="flex-1 h-px bg-white/5" />
                     </div>
-                  </FadePanel>
+                    <div className="flex items-center gap-3 bg-white/3 border border-white/5 hover:border-[#D4AF37]/25 rounded-xl px-3 sm:px-4 py-3 transition-all duration-300 group">
+                      <div className="text-[#D4AF37] flex-shrink-0">
+                        <Ship size={15} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs sm:text-sm font-black text-white group-hover:text-[#D4AF37] transition-colors duration-300">
+                          Maritime
+                        </div>
+                        <div className="text-[9px] sm:text-[10px] text-gray-500 truncate">
+                          Toutes marchandises (sauf téléphones/ordinateurs)
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-xs sm:text-sm font-black text-white">
+                          {fmt(SEA_RATE_CBM)}
+                        </div>
+                        <div className="text-[8px] sm:text-[9px] text-gray-500">
+                          / CBM
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
+                {/* ── INTERDITS ── */}
                 {tab === "prohibited" && (
-                  <FadePanel animKey="prohibited">
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 sm:p-5 space-y-3">
-                      <div className="flex items-center gap-2 text-red-400 font-black text-[10px] sm:text-xs uppercase tracking-widest">
-                        <AlertTriangle size={14} /> Marchandises interdites
-                      </div>
-                      <ul className="space-y-3">
-                        {PROHIBITED_ITEMS.map((item, i) => (
-                          <li
-                            key={i}
-                            className="flex items-start gap-2.5 text-[10px] sm:text-xs text-red-400/80"
-                          >
-                            <span className="mt-1.5 block w-1.5 h-1.5 rounded-full bg-red-500/70 flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
+                  <div className="anim-tab bg-red-500/10 border border-red-500/20 rounded-2xl p-4 sm:p-5 space-y-3">
+                    <div className="flex items-center gap-2 text-red-400 font-black text-[10px] sm:text-xs uppercase tracking-widest">
+                      <AlertTriangle size={14} /> Marchandises interdites
                     </div>
-                  </FadePanel>
+                    <ul className="space-y-3">
+                      {PROHIBITED_ITEMS.map((item, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-2.5 text-[10px] sm:text-xs text-red-400/80"
+                        >
+                          <span className="mt-1.5 block w-1.5 h-1.5 rounded-full bg-red-500/70 flex-shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
             </div>

@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   useLocation,
+  Navigate, // Importé ici pour éviter le require() plus bas
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -12,6 +13,7 @@ import "./index.css";
 // Context & Guards
 import { AuthProvider } from "./context/AuthProvider";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
+import { useAuth } from "./context/useAuth"; // Import propre
 
 // Layouts & UI
 import Navbar from "./components/layout/Navbar";
@@ -29,6 +31,10 @@ import Register from "./pages/Register";
 // Dashboard
 import UserLayout from "./pages/dashboard/user/UserLayout.jsx";
 import AdminLayout from "./pages/dashboard/admin/AdminLayout";
+
+import Terms from "./pages/legal/Terms.jsx";
+import Privacy from "./pages/legal/Privacy.jsx";
+import KYCPolicy from "./pages/legal/KYCPolicy.jsx";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -51,10 +57,7 @@ function AnimatedRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* --- Dashboard User ---
-              ✅ FIX : chaque route est indépendante avec son propre ProtectedRoute.
-              Plus de parent/enfant avec DashboardGuard qui bloquait l'affichage.
-          */}
+          {/* --- Dashboard --- */}
           <Route
             path="/dashboard/user"
             element={
@@ -72,28 +75,27 @@ function AnimatedRoutes() {
             }
           />
 
-          {/* --- Fallback /dashboard → redirection selon rôle --- */}
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                {/* DashboardGuard navigue vers /dashboard/user ou /dashboard/admin */}
                 <DashboardRedirect />
               </ProtectedRoute>
             }
           />
+
+          {/* --- Routes Légales (CORRIGÉES ICI) --- */}
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/kyc-policy" element={<KYCPolicy />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
   );
 }
 
-// Petit composant de redirection inline — évite d'importer DashboardGuard
 function DashboardRedirect() {
-  // eslint-disable-next-line no-undef
-  const { isAdmin } = require("./context/useAuth").useAuth();
-  // eslint-disable-next-line no-undef
-  const { Navigate } = require("react-router-dom");
+  const { isAdmin } = useAuth();
   return (
     <Navigate to={isAdmin ? "/dashboard/admin" : "/dashboard/user"} replace />
   );

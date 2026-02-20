@@ -40,7 +40,7 @@ function Footer() {
             <h3 className="text-xl text-white font-black tracking-tighter uppercase mb-2">
               BJ<span className="text-[#D4AF37]">BUSINESS</span>
             </h3>
-            <p className="text-gray-500 text-[12px] leading-relaxed">
+            <p className="text-gray-500 text-[13px] leading-relaxed font-bold">
               Sourcing et logistique Chine-Afrique. Qualité, Transparence,
               Sécurité.
             </p>
@@ -113,7 +113,7 @@ function Footer() {
                 Contact
               </h4>
             </div>
-            <ul className="flex flex-col space-y-2.5 pb-5 lg:pb-0 text-[12px] text-gray-400">
+            <ul className="flex flex-col space-y-2.5 pb-5 lg:pb-0 text-[13px] text-gray-400 font-bold">
               <li className="flex items-center gap-3 justify-center lg:justify-start">
                 <Mail size={14} className="text-[#D4AF37]" />{" "}
                 contact@bjbusiness.com
