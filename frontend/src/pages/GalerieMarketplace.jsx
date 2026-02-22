@@ -6,10 +6,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ShoppingCart,
-  Bell,
   BellRing,
   Search,
-  ShieldCheck,
   CheckCircle,
   X,
   Tag,
@@ -21,7 +19,6 @@ import {
   Lock,
 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
-import { useTheme } from "../context/ThemeContext";
 
 const COMMISSION_RATE = 0.01;
 const formatCurrency = (n) =>
@@ -88,7 +85,7 @@ function StatusBadge({ status }) {
 
 // ── Champ code promo ──────────────────────────────────────────────────────────
 function PromoInput({ price, onDiscount }) {
-  const { validatePromoCode } = useAuth();
+  const { validatePromoCode, applyPromoCode } = useAuth();
   const [code, setCode] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -100,7 +97,12 @@ function PromoInput({ price, onDiscount }) {
       const res = validatePromoCode(code, price);
       setResult(res);
       if (res.valid) {
-        onDiscount(res.discount, res.promo);
+        onDiscount(
+          res.discount,
+          res.promo
+            ? { ...res.promo, markUsed: () => applyPromoCode(res.promo.id) }
+            : null,
+        );
       } else {
         onDiscount(0, null);
       }
@@ -314,10 +316,7 @@ export default function GalerieMarketplace() {
     handleMarketplaceBuy,
     registerStockAlert,
     MARKETPLACE_CATEGORIES,
-    usePromoCode,
   } = useAuth();
-  const { isGold } = useTheme();
-
   const [activeCategory, setActiveCategory] = useState("TOUT");
   const [searchQuery, setSearchQuery] = useState("");
   const [alertedItems, setAlertedItems] = useState(new Set());
@@ -363,8 +362,7 @@ export default function GalerieMarketplace() {
       });
       return;
     }
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    if (promo) usePromoCode(promo.id);
+    if (promo) promo.markUsed?.();
     showToast(
       `Commande pour "${item.name}" créée !${promo ? ` (Code ${promo.code} appliqué)` : ""}`,
       "success",
@@ -390,13 +388,8 @@ export default function GalerieMarketplace() {
     { id: "TOUT", label: "Tout", icon: "📦" },
   ];
 
-  // Fond selon thème
-  const pageBg = isGold ? "bg-[#100e00]" : "bg-[#0A0A0B]";
-
   return (
-    <div
-      className={`min-h-screen ${pageBg} pb-24 transition-colors duration-500`}
-    >
+    <div className="min-h-screen bg-[#0A0A0B] pb-24">
       {/* En-tête */}
       <div className="relative overflow-hidden border-b border-white/5">
         <div

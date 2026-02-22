@@ -285,7 +285,7 @@ const Sourcing = ({ currentUser }) => {
             </div>
           </div>
           <a
-            href="https://wa.me/22890000000"
+            href="https://wa.me/22990000000"
             target="_blank"
             className="bg-[#25D366] text-white px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all flex items-center gap-2"
           >

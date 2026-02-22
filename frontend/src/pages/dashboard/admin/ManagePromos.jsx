@@ -1,5 +1,6 @@
 // src/pages/dashboard/admin/ManagePromos.jsx
-// Gestion codes promo : créer, activer/désactiver, supprimer
+// ✅ FloatInput + FloatSelect pour les champs du formulaire
+// ✅ Responsive mobile/tablette/desktop
 import { useState } from "react";
 import { useAuth } from "../../../context/useAuth";
 import {
@@ -16,28 +17,30 @@ import {
   Users,
 } from "lucide-react";
 import { generateId } from "../../../utils/constants";
+import FloatInput from "../../../components/ui/FloatInput";
+import FloatSelect from "../../../components/ui/FloatSelect";
 
 const EMPTY_FORM = {
   code: "",
   discount: "",
-  type: "PERCENT", // PERCENT | FIXED
+  type: "PERCENT",
   maxUses: "",
   expiresAt: "",
   minOrder: "",
 };
 
 const TYPE_OPTIONS = [
-  { value: "PERCENT", label: "% Réduction", icon: "%" },
-  { value: "FIXED", label: "Montant fixe (FCFA)", icon: "F" },
+  { value: "PERCENT", label: "% Réduction" },
+  { value: "FIXED", label: "Montant fixe (FCFA)" },
 ];
 
+// ── Modal Création ─────────────────────────────────────────────────────────────
 function CreateModal({ onClose, onCreate }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
-  // Génère un code aléatoire style AURUM20
   const generateCode = () => {
     const words = ["AURUM", "GOLD", "BJB", "VIP", "PROMO", "LUXE"];
     const numbers = ["10", "15", "20", "25", "30", "50"];
@@ -74,9 +77,6 @@ function CreateModal({ onClose, onCreate }) {
     onClose();
   };
 
-  const inputCls =
-    "w-full bg-[#0A0A0B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-[#D4AF37]/50 transition-colors";
-
   return (
     <div
       className="fixed inset-0 z-[500] flex items-center justify-center p-4"
@@ -87,8 +87,9 @@ function CreateModal({ onClose, onCreate }) {
         onClick={onClose}
       />
       <div className="relative bg-[#111112] border border-[#D4AF37]/20 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 flex-shrink-0">
-          <h3 className="font-black text-white uppercase tracking-tight text-lg flex items-center gap-2">
+          <h3 className="font-black text-white uppercase tracking-tight text-base sm:text-lg flex items-center gap-2">
             <Tag size={18} className="text-[#D4AF37]" /> Nouveau Code Promo
           </h3>
           <button
@@ -99,23 +100,25 @@ function CreateModal({ onClose, onCreate }) {
           </button>
         </div>
 
-        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+        {/* Formulaire */}
+        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {/* Code */}
           <div>
-            <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+            <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2 block">
               Code promo *
             </label>
             <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Ex: AURUM20"
-                value={form.code}
-                onChange={(e) => set("code", e.target.value.toUpperCase())}
-                className={inputCls + " flex-1 font-mono tracking-widest"}
-              />
+              <div className="flex-1">
+                <FloatInput
+                  label="Ex: AURUM20"
+                  name="code"
+                  value={form.code}
+                  onChange={(e) => set("code", e.target.value.toUpperCase())}
+                />
+              </div>
               <button
                 onClick={generateCode}
-                className="px-3 py-2.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-black text-[10px] uppercase tracking-wide hover:bg-[#D4AF37]/20 transition-colors whitespace-nowrap"
+                className="px-3 py-2 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-black text-[10px] uppercase tracking-wide hover:bg-[#D4AF37]/20 transition-colors whitespace-nowrap self-start mt-1"
               >
                 Générer
               </button>
@@ -127,102 +130,88 @@ function CreateModal({ onClose, onCreate }) {
             <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2 block">
               Type de réduction *
             </label>
-            <div className="flex gap-3">
-              {TYPE_OPTIONS.map((t) => (
-                <button
-                  key={t.value}
-                  onClick={() => set("type", t.value)}
-                  className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide border transition-all ${
-                    form.type === t.value
-                      ? "bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]"
-                      : "bg-white/3 border-white/10 text-gray-500 hover:border-white/20"
-                  }`}
-                >
-                  {t.icon} {t.label}
-                </button>
-              ))}
-            </div>
+            <FloatSelect
+              label="Type"
+              value={form.type}
+              onChange={(val) => set("type", val)}
+              options={TYPE_OPTIONS}
+              icon={Percent}
+            />
           </div>
 
           {/* Réduction + commande min */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2 block">
                 Réduction {form.type === "PERCENT" ? "(%)" : "(FCFA)"} *
               </label>
-              <input
+              <FloatInput
+                label={form.type === "PERCENT" ? "Ex: 20" : "Ex: 5000"}
+                name="discount"
                 type="number"
-                min="0"
-                placeholder={form.type === "PERCENT" ? "Ex: 20" : "Ex: 5000"}
                 value={form.discount}
                 onChange={(e) => set("discount", e.target.value)}
-                className={inputCls}
               />
             </div>
             <div>
-              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2 block">
                 Commande min (FCFA)
               </label>
-              <input
+              <FloatInput
+                label="Ex: 50000"
+                name="minOrder"
                 type="number"
-                min="0"
-                placeholder="Ex: 50000"
                 value={form.minOrder}
                 onChange={(e) => set("minOrder", e.target.value)}
-                className={inputCls}
               />
             </div>
           </div>
 
           {/* Utilisations max + expiration */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
-                <Users size={10} className="inline mr-1" />
-                Utilisations max
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2 block">
+                <Users size={10} className="inline mr-1" /> Utilisations max
               </label>
-              <input
+              <FloatInput
+                label="Illimité"
+                name="maxUses"
                 type="number"
-                min="1"
-                placeholder="Illimité"
                 value={form.maxUses}
                 onChange={(e) => set("maxUses", e.target.value)}
-                className={inputCls}
               />
             </div>
             <div>
-              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
-                <Calendar size={10} className="inline mr-1" />
-                Date d'expiration
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2 block">
+                <Calendar size={10} className="inline mr-1" /> Date d'expiration
               </label>
-              <input
+              <FloatInput
+                label="Date"
+                name="expiresAt"
                 type="date"
                 value={form.expiresAt}
                 onChange={(e) => set("expiresAt", e.target.value)}
-                className={inputCls + " [color-scheme:dark]"}
               />
             </div>
           </div>
 
           {/* Preview */}
           {form.code && form.discount && (
-            <div className="p-3.5 bg-[#D4AF37]/8 border border-[#D4AF37]/20 rounded-xl flex items-center justify-between">
-              <div>
-                <p className="text-[10px] text-gray-500 font-black uppercase">
-                  Aperçu
-                </p>
-                <p className="text-sm font-black text-white mt-0.5">
-                  Code{" "}
-                  <span className="text-[#D4AF37] font-mono tracking-widest">
-                    {form.code}
-                  </span>{" "}
-                  →{" "}
-                  {form.type === "PERCENT"
-                    ? `-${form.discount}%`
-                    : `-${form.discount} FCFA`}
-                  {form.minOrder ? ` (min ${form.minOrder} FCFA)` : ""}
-                </p>
-              </div>
+            <div className="p-3.5 bg-[#D4AF37]/8 border border-[#D4AF37]/20 rounded-xl">
+              <p className="text-[10px] text-gray-500 font-black uppercase mb-1">
+                Aperçu
+              </p>
+              <p className="text-sm font-black text-white">
+                Code{" "}
+                <span className="text-[#D4AF37] font-mono tracking-widest">
+                  {form.code}
+                </span>
+                {" → "}
+                {form.type === "PERCENT"
+                  ? `-${form.discount}%`
+                  : `-${form.discount} FCFA`}
+                {form.minOrder ? ` (min ${form.minOrder} FCFA)` : ""}
+              </p>
             </div>
           )}
 
@@ -233,7 +222,8 @@ function CreateModal({ onClose, onCreate }) {
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-white/5 flex-shrink-0">
+        {/* Footer */}
+        <div className="px-5 sm:px-6 py-4 border-t border-white/5 flex-shrink-0">
           <button
             onClick={submit}
             className="w-full py-3.5 bg-[#D4AF37] text-black font-black uppercase text-[11px] tracking-widest rounded-xl hover:opacity-90 transition-opacity"
@@ -246,6 +236,7 @@ function CreateModal({ onClose, onCreate }) {
   );
 }
 
+// ── Page principale ────────────────────────────────────────────────────────────
 export default function ManagePromos() {
   const { db, setDb } = useAuth();
   const [showModal, setShowModal] = useState(false);
@@ -253,21 +244,19 @@ export default function ManagePromos() {
 
   const promos = db.promoCodes || [];
 
-  const addPromo = (newPromo) => {
+  const addPromo = (newPromo) =>
     setDb((prev) => ({
       ...prev,
       promoCodes: [newPromo, ...(prev.promoCodes || [])],
     }));
-  };
 
-  const toggleActive = (id) => {
+  const toggleActive = (id) =>
     setDb((prev) => ({
       ...prev,
       promoCodes: prev.promoCodes.map((p) =>
         p.id === id ? { ...p, active: !p.active } : p,
       ),
     }));
-  };
 
   const deletePromo = (id) => {
     if (!window.confirm("Supprimer ce code promo ?")) return;
@@ -286,7 +275,6 @@ export default function ManagePromos() {
   const activeCount = promos.filter((p) => p.active).length;
   const totalUses = promos.reduce((s, p) => s + (p.uses || 0), 0);
 
-  // Statut d'un promo
   const getStatus = (p) => {
     if (!p.active)
       return {
@@ -321,12 +309,12 @@ export default function ManagePromos() {
           ].map(({ label, count, color }) => (
             <div
               key={label}
-              className="bg-[#111112] border border-white/5 rounded-2xl p-4"
+              className="bg-[#111112] border border-white/5 rounded-2xl p-3 sm:p-4"
             >
-              <div className="text-2xl font-black" style={{ color }}>
+              <div className="text-xl sm:text-2xl font-black" style={{ color }}>
                 {count}
               </div>
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5">
+              <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 leading-tight">
                 {label}
               </div>
             </div>
@@ -334,13 +322,15 @@ export default function ManagePromos() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-5 py-3 bg-[#D4AF37] text-black font-black uppercase text-[11px] tracking-widest rounded-xl hover:opacity-90 flex-shrink-0"
+          className="flex items-center gap-2 px-4 sm:px-5 py-3 bg-[#D4AF37] text-black font-black uppercase text-[11px] tracking-widest rounded-xl hover:opacity-90 flex-shrink-0"
         >
-          <Plus size={15} /> Nouveau code
+          <Plus size={15} />{" "}
+          <span className="hidden sm:inline">Nouveau code</span>
+          <span className="sm:hidden">Nouveau</span>
         </button>
       </div>
 
-      {/* Liste des promos */}
+      {/* Liste promos */}
       {promos.length === 0 ? (
         <div className="bg-[#111112] border border-white/5 rounded-2xl py-16 text-center">
           <Tag size={32} className="mx-auto text-gray-700 mb-3" />
@@ -361,24 +351,25 @@ export default function ManagePromos() {
             return (
               <div
                 key={p.id}
-                className={`bg-[#111112] border rounded-2xl px-5 py-4 flex items-center justify-between gap-3 flex-wrap transition-colors ${
+                className={`bg-[#111112] border rounded-2xl px-4 sm:px-5 py-4 flex items-center justify-between gap-3 flex-wrap transition-colors ${
                   p.active
                     ? "border-white/5 hover:border-white/10"
                     : "border-white/3 opacity-60"
                 }`}
               >
-                {/* Gauche — code + infos */}
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/15 flex items-center justify-center flex-shrink-0">
+                {/* Gauche */}
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/15 flex items-center justify-center flex-shrink-0">
                     {p.type === "PERCENT" ? (
-                      <Percent size={16} className="text-[#D4AF37]" />
+                      <Percent size={15} className="text-[#D4AF37]" />
                     ) : (
-                      <Tag size={16} className="text-[#D4AF37]" />
+                      <Tag size={15} className="text-[#D4AF37]" />
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono font-black text-white text-base tracking-widest">
+                  <div className="min-w-0 flex-1">
+                    {/* Ligne code + statut */}
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <span className="font-mono font-black text-white text-sm sm:text-base tracking-widest">
                         {p.code}
                       </span>
                       <button
@@ -398,27 +389,25 @@ export default function ManagePromos() {
                         {status.label}
                       </span>
                     </div>
-                    <div className="text-[11px] text-gray-500 mt-0.5 flex items-center gap-3 flex-wrap">
+                    {/* Infos */}
+                    <div className="text-[10px] sm:text-[11px] text-gray-500 flex items-center gap-2 sm:gap-3 flex-wrap">
                       <span className="text-[#D4AF37] font-bold">
                         {p.type === "PERCENT"
                           ? `-${p.discount}%`
                           : `-${p.discount} FCFA`}
                       </span>
                       {p.minOrder > 0 && (
-                        <span>Min {p.minOrder.toLocaleString()} FCFA</span>
+                        <span>Min {p.minOrder.toLocaleString()} F</span>
                       )}
-                      {p.maxUses && (
+                      {p.maxUses ? (
                         <span>
-                          {p.uses}/{p.maxUses} utilisations
+                          {p.uses}/{p.maxUses} util.
                         </span>
-                      )}
-                      {!p.maxUses && (
-                        <span>
-                          {p.uses} utilisation{p.uses !== 1 ? "s" : ""}
-                        </span>
+                      ) : (
+                        <span>{p.uses} util.</span>
                       )}
                       {p.expiresAt && (
-                        <span>
+                        <span className="hidden sm:inline">
                           Exp.{" "}
                           {new Date(p.expiresAt).toLocaleDateString("fr-FR")}
                         </span>
@@ -428,14 +417,10 @@ export default function ManagePromos() {
                 </div>
 
                 {/* Droite — actions */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     onClick={() => toggleActive(p.id)}
-                    className={`p-2 rounded-lg transition-all ${
-                      p.active
-                        ? "text-green-400 hover:bg-green-500/10"
-                        : "text-gray-600 hover:bg-white/5"
-                    }`}
+                    className={`p-2 rounded-lg transition-all ${p.active ? "text-green-400 hover:bg-green-500/10" : "text-gray-600 hover:bg-white/5"}`}
                     title={p.active ? "Désactiver" : "Activer"}
                   >
                     {p.active ? (

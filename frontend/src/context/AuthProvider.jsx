@@ -93,6 +93,14 @@ const DEFAULT_MARKETPLACE = [
   },
 ];
 
+const MARKETPLACE_CATEGORIES = [
+  { id: "TOUT", label: "Tout", icon: "📦" },
+  { id: "ELECTRONIQUE", label: "Électronique", icon: "📱" },
+  { id: "MODE", label: "Mode", icon: "👗" },
+  { id: "MAISON", label: "Maison", icon: "🏠" },
+  { id: "AUTO", label: "Auto", icon: "🚗" },
+];
+
 const DEFAULT_DB = {
   users: [],
   orders: [
@@ -121,6 +129,7 @@ const DEFAULT_DB = {
   ],
   marketplace: DEFAULT_MARKETPLACE,
   kycRequests: [],
+  promoCodes: [],
   notifications: [
     {
       id: 1,
@@ -183,7 +192,7 @@ export const AuthProvider = ({ children }) => {
   }, [db.notifications, currentUser]);
 
   // ── LOGIN ─────────────────────────────────────────────────────────────────
-  const login = useCallback(async (email, _password) => {
+  const login = useCallback(async (email) => {
     setAuthLoading(true);
     setAuthError("");
     return new Promise((resolve) => {
@@ -341,6 +350,72 @@ export const AuthProvider = ({ children }) => {
     }));
   }, []);
 
+  // ── MARKETPLACE — achat & alerte stock ────────────────────────────────────
+  const handleMarketplaceBuy = useCallback(
+    (item) => {
+      if (!currentUser) return { needsLogin: true };
+      if (currentUser.kycStatus !== "VALID") return { needsKyc: true };
+
+      const newOrder = {
+        id: generateId("ORD"),
+        userId: currentUser.uid,
+        product: item.name,
+        price: item.price,
+        status: "EN_ATTENTE",
+        type: "MARKETPLACE",
+        date: new Date().toLocaleDateString("fr-FR"),
+        trackingInternal: generateId("BJB"),
+        trackingCarrier: "En attente",
+      };
+      setDb((prev) => ({ ...prev, orders: [newOrder, ...prev.orders] }));
+      return { success: true, order: newOrder };
+    },
+    [currentUser],
+  );
+
+  const registerStockAlert = useCallback((itemId) => {
+    // En prod : appel API pour enregistrer l'alerte email/SMS
+    return { success: true, itemId };
+  }, []);
+
+  // ── CODES PROMO — validation côté client ──────────────────────────────────
+  const validatePromoCode = useCallback(
+    (code, orderAmount) => {
+      const promos = db.promoCodes || [];
+      const promo = promos.find(
+        (p) => p.code === code.toUpperCase() && p.active,
+      );
+      if (!promo) return { valid: false, message: "Code invalide ou inactif." };
+      if (promo.expiresAt && new Date(promo.expiresAt) < new Date())
+        return { valid: false, message: "Ce code a expiré." };
+      if (promo.maxUses && promo.uses >= promo.maxUses)
+        return {
+          valid: false,
+          message: "Ce code a atteint son nombre maximal d'utilisations.",
+        };
+      if (promo.minOrder && orderAmount < promo.minOrder)
+        return {
+          valid: false,
+          message: `Commande minimum : ${promo.minOrder.toLocaleString()} FCFA.`,
+        };
+      const discount =
+        promo.type === "PERCENT"
+          ? Math.round((orderAmount * promo.discount) / 100)
+          : promo.discount;
+      return { valid: true, discount, promo };
+    },
+    [db.promoCodes],
+  );
+
+  const applyPromoCode = useCallback((promoId) => {
+    setDb((prev) => ({
+      ...prev,
+      promoCodes: (prev.promoCodes || []).map((p) =>
+        p.id === promoId ? { ...p, uses: (p.uses || 0) + 1 } : p,
+      ),
+    }));
+  }, []);
+
   const value = {
     currentUser,
     isAuthenticated,
@@ -361,6 +436,11 @@ export const AuthProvider = ({ children }) => {
     deleteNotif,
     adminUpdateKyc,
     adminUpdateOrderStatus,
+    handleMarketplaceBuy,
+    registerStockAlert,
+    validatePromoCode,
+    applyPromoCode,
+    MARKETPLACE_CATEGORIES,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

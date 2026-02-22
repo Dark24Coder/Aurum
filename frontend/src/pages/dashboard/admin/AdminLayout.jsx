@@ -12,6 +12,7 @@ import {
   Settings as SettingsIcon,
   UserCircle,
   X,
+  Tag,
 } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +23,7 @@ import ManageOrders from "./ManageOrders";
 import ManageMarket from "./ManageMarket";
 import UsersAdmin from "./Users";
 import Settings from "./Settings";
+import ManagePromos from "./ManagePromos";
 
 const TABS = [
   { id: "overview", label: "Vue d'ensemble", icon: LayoutDashboard },
@@ -29,6 +31,7 @@ const TABS = [
   { id: "orders", label: "Commandes", icon: Package },
   { id: "marketplace", label: "Marketplace", icon: Store },
   { id: "users", label: "Utilisateurs", icon: Users },
+  { id: "promos", label: "Promos", icon: Tag },
   { id: "settings", label: "Configuration", icon: SettingsIcon },
 ];
 
@@ -116,23 +119,26 @@ export default function AdminLayout() {
           </div>
 
           <nav className="flex-1 space-y-1">
-            {TABS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 font-bold text-sm ${
-                  activeTab === id
-                    ? "bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20"
-                    : "text-gray-500 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon size={16} />
-                  {label}
-                </div>
-                {activeTab === id && <ChevronRight size={13} />}
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const TIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 font-bold text-sm ${
+                    activeTab === tab.id
+                      ? "bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20"
+                      : "text-gray-500 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <TIcon size={16} />
+                    {tab.label}
+                  </div>
+                  {activeTab === tab.id && <ChevronRight size={13} />}
+                </button>
+              );
+            })}
           </nav>
 
           <button
@@ -337,23 +343,26 @@ export default function AdminLayout() {
 
           <div className="flex gap-2 overflow-x-auto no-scrollbar">
             <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
-            {TABS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => {
-                  setActiveTab(id);
-                  setNotifOpen(false);
-                }}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wide whitespace-nowrap transition-all flex-shrink-0 ${
-                  activeTab === id
-                    ? "bg-[#D4AF37] text-black"
-                    : "bg-white/5 text-gray-400 border border-white/10"
-                }`}
-              >
-                <Icon size={11} />
-                {label}
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const TIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setNotifOpen(false);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wide whitespace-nowrap transition-all flex-shrink-0 ${
+                    activeTab === tab.id
+                      ? "bg-[#D4AF37] text-black"
+                      : "bg-white/5 text-gray-400 border border-white/10"
+                  }`}
+                >
+                  <TIcon size={11} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -368,6 +377,7 @@ export default function AdminLayout() {
             {activeTab === "marketplace" && <ManageMarket />}
             {activeTab === "users" && <UsersAdmin />}
             {activeTab === "settings" && <Settings />}
+            {activeTab === "promos" && <ManagePromos />}
           </div>
         </div>
       </main>

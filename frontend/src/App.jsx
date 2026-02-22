@@ -1,10 +1,9 @@
-/* eslint-disable no-unused-vars */
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
-  Navigate, // Importé ici pour éviter le require() plus bas
+  Navigate,
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -13,7 +12,7 @@ import "./index.css";
 // Context & Guards
 import { AuthProvider } from "./context/AuthProvider";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
-import { useAuth } from "./context/useAuth"; // Import propre
+import { useAuth } from "./context/useAuth";
 
 // Layouts & UI
 import Navbar from "./components/layout/Navbar";
@@ -27,6 +26,7 @@ import Marketplace from "./pages/Marketplace";
 import Groupage from "./pages/Groupage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import GalerieMarketplace from "./pages/GalerieMarketplace";
 
 // Dashboard
 import UserLayout from "./pages/dashboard/user/UserLayout.jsx";
@@ -74,6 +74,7 @@ function AnimatedRoutes() {
               </ProtectedRoute>
             }
           />
+          <Route path="/galerie" element={<GalerieMarketplace />} />
 
           <Route
             path="/dashboard"
