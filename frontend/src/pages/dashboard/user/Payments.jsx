@@ -14,7 +14,7 @@ const Payments = () => {
   const paidOrders = userOrders.filter((o) => (o.price || 0) > 0);
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <main className="space-y-4 max-w-3xl">
       <h3 className="text-xl font-black text-white uppercase mb-6">
         Historique Financier
       </h3>
@@ -89,7 +89,7 @@ const Payments = () => {
           </p>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

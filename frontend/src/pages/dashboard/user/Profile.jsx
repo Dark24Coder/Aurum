@@ -1,4 +1,3 @@
-// src/pages/dashboard/user/Profile.jsx
 import React, { useState } from "react";
 import {
   User,
@@ -85,7 +84,7 @@ const Profile = () => {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <main className="max-w-2xl mx-auto space-y-8">
       {/* INFORMATIONS PERSONNELLES */}
       <div>
         <h3 className="text-xl font-black text-white uppercase mb-6 text-center">
@@ -311,13 +310,13 @@ const Profile = () => {
           </form>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 
 function UploadZone({ label, value, onChange, required }) {
   return (
-    <div>
+    <main>
       <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1 mb-1.5 block">
         {label}
       </label>
@@ -339,7 +338,7 @@ function UploadZone({ label, value, onChange, required }) {
           </>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

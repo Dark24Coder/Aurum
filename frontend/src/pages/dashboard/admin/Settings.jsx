@@ -44,7 +44,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-6 pb-10">
+    <main className="space-y-6 pb-10">
       {/* ── Profil Admin ── */}
       <section className="bg-[#111112] border border-[#D4AF37]/20 rounded-2xl p-6 sm:p-8 space-y-6">
         <div className="flex items-center gap-3 border-b border-white/5 pb-5">
@@ -224,6 +224,6 @@ export default function Settings() {
           )}
         </button>
       </section>
-    </div>
+    </main>
   );
 }

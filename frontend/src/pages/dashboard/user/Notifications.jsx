@@ -33,7 +33,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <main className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-black text-white uppercase">
@@ -108,7 +108,7 @@ const Notifications = () => {
           </p>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

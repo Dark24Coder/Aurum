@@ -265,7 +265,7 @@ export default function ManageMarket() {
   const ruptureCount = marketplace.filter((i) => i.status === "RUPTURE").length;
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Stats + bouton ajout */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">
@@ -442,6 +442,6 @@ export default function ManageMarket() {
           onAdd={addProduct}
         />
       )}
-    </div>
+    </main>
   );
 }

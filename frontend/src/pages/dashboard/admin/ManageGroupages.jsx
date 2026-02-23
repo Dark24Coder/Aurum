@@ -104,7 +104,7 @@ function CreateModal({ onClose, onCreate }) {
   };
 
   return (
-    <div
+    <main
       className="fixed inset-0 z-[500] flex items-center justify-center p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
@@ -230,7 +230,7 @@ function CreateModal({ onClose, onCreate }) {
           </button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -240,7 +240,7 @@ function GroupageRow({ grp, onStatusChange, onDelete, participants }) {
   const pct = Math.min(100, Math.round((grp.reserved / grp.target) * 100));
 
   return (
-    <div
+    <main
       className={`bg-[#111112] border rounded-2xl overflow-hidden transition-colors ${grp.status === "OUVERT" ? "border-white/5 hover:border-white/10" : "border-white/3 opacity-70"}`}
     >
       {/* Ligne principale */}
@@ -356,7 +356,7 @@ function GroupageRow({ grp, onStatusChange, onDelete, participants }) {
           ))}
         </div>
       )}
-    </div>
+    </main>
   );
 }
 
@@ -401,7 +401,7 @@ export default function ManageGroupages() {
   ).length;
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Stats + bouton */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">
@@ -465,6 +465,6 @@ export default function ManageGroupages() {
           onCreate={addGroupage}
         />
       )}
-    </div>
+    </main>
   );
 }

@@ -192,7 +192,7 @@ const Marketplace = ({ currentUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] pt-32 pb-20 px-4 text-white">
+    <main className="min-h-screen bg-[#0A0A0B] pt-32 pb-20 px-4 text-white">
       {/* TOAST */}
       <div
         className={`fixed top-10 left-1/2 -translate-x-1/2 z-[500] transition-all duration-500 ${alert.show ? "translate-y-0 opacity-100" : "-translate-y-12 opacity-0 pointer-events-none"}`}
@@ -623,7 +623,7 @@ const Marketplace = ({ currentUser }) => {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

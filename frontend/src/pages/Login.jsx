@@ -49,8 +49,7 @@ function Login() {
   };
 
   return (
-    /* ── py réduit pour coller à la navbar et au footer ── */
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-6 sm:py-10">
+    <main className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-6 sm:py-10">
       <div className="w-full max-w-md bg-[#161617] border border-white/5 rounded-[2rem] p-7 sm:p-10 shadow-2xl animate-fade-in-up">
         {/* Header */}
         <div className="text-center mb-7">
@@ -198,7 +197,7 @@ function Login() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

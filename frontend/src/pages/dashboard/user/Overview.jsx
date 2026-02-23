@@ -58,7 +58,7 @@ const Overview = ({ setActiveTab }) => {
   }, [userOrders, currentUser]);
 
   return (
-    <div className="space-y-10">
+    <main className="space-y-10">
       {/* ── STATS ─────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s, i) => (
@@ -160,7 +160,7 @@ const Overview = ({ setActiveTab }) => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

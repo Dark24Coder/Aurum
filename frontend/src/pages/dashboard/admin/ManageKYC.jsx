@@ -122,7 +122,7 @@ export default function ManageKYC() {
   ).length;
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Compteurs rapides */}
       <div className="grid grid-cols-3 gap-3">
         {[
@@ -287,6 +287,6 @@ export default function ManageKYC() {
       {detailReq && (
         <DocModal req={detailReq} onClose={() => setDetailReq(null)} />
       )}
-    </div>
+    </main>
   );
 }

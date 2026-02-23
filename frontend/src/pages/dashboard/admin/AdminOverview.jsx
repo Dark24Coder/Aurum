@@ -122,7 +122,7 @@ export default function AdminOverview({ setActiveTab }) {
   };
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Alerte KYC */}
       {pendingKyc > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-center justify-between gap-3">
@@ -365,6 +365,6 @@ export default function AdminOverview({ setActiveTab }) {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

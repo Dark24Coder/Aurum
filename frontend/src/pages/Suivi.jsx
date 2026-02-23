@@ -1,8 +1,3 @@
-// src/pages/Suivi.jsx
-// ✅ FloatInput du composant partagé src/components/ui/FloatInput
-// ✅ Transitions fluides entre onglets (tab-enter animation, pas de montage brutal)
-// ✅ Zéro emoji — 100% icônes Lucide
-// ✅ Section "Comment ça marche" avec grandes icônes et texte mis en avant
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -137,7 +132,7 @@ function StatusBadge({ status }) {
 function Timeline({ status }) {
   if (status === "ANNULE") {
     return (
-      <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+      <main className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
         <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
           <ShieldCheck size={16} className="text-red-400" />
         </div>
@@ -149,11 +144,11 @@ function Timeline({ status }) {
             Cette commande a été annulée.
           </div>
         </div>
-      </div>
+      </main>
     );
   }
   return (
-    <div>
+    <main>
       {TIMELINE_STEPS.map((step, i) => {
         const done = step.matches.includes(status);
         const current =
@@ -203,13 +198,13 @@ function Timeline({ status }) {
           </div>
         );
       })}
-    </div>
+    </main>
   );
 }
 
 function TrackingResult({ order }) {
   return (
-    <div className="bg-[#111112] border border-[#D4AF37]/20 rounded-[2rem] overflow-hidden result-pop">
+    <main className="bg-[#111112] border border-[#D4AF37]/20 rounded-[2rem] overflow-hidden result-pop">
       <div className="px-5 sm:px-6 py-5 border-b border-white/5 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center flex-shrink-0">
@@ -262,7 +257,7 @@ function TrackingResult({ order }) {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -282,7 +277,7 @@ function PublicTracker({ db }) {
   };
 
   return (
-    <div className="space-y-5">
+    <main className="space-y-5">
       {/* FloatInput partagé + bouton */}
       <div className="flex gap-2 items-center">
         <div className="flex-1">
@@ -319,7 +314,7 @@ function PublicTracker({ db }) {
         </div>
       )}
       {result && result !== "NOT_FOUND" && <TrackingResult order={result} />}
-    </div>
+    </main>
   );
 }
 
@@ -345,7 +340,7 @@ function MyOrdersTracker({ db, currentUser }) {
   const selectedOrder = myOrders.find((o) => o.id === selected);
 
   return (
-    <div className="space-y-5">
+    <main className="space-y-5">
       <FloatInput
         label="Filtrer par produit ou numéro de suivi…"
         name="filter"
@@ -434,7 +429,7 @@ function MyOrdersTracker({ db, currentUser }) {
           <TrackingResult order={selectedOrder} />
         </div>
       )}
-    </div>
+    </main>
   );
 }
 
@@ -505,7 +500,7 @@ function HowItWorks() {
   return (
     <section className="mt-20 pb-4">
       {/* Titre section */}
-      <div className="text-center mb-12">
+      <main className="text-center mb-12">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="h-px w-12 bg-[#D4AF37]/40" />
           <Sparkles size={14} className="text-[#D4AF37]" />
@@ -518,7 +513,7 @@ function HowItWorks() {
           De la commande à la livraison, voici les quatre étapes qui
           garantissent la sécurité et la transparence de chaque importation.
         </p>
-      </div>
+      </main>
 
       {/* Grille 4 étapes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
@@ -603,7 +598,7 @@ export default function SuiviPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] pb-24">
+    <main className="min-h-screen bg-[#0A0A0B] pb-24">
       <SuiviStyles />
 
       {/* ── Hero ── */}
@@ -730,6 +725,6 @@ export default function SuiviPage() {
         {/* ── Comment ça marche ── */}
         <HowItWorks />
       </div>
-    </div>
+    </main>
   );
 }

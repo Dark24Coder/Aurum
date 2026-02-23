@@ -1,15 +1,10 @@
-// src/context/AuthProvider.jsx
-// ✅ SESSION PERSISTANTE via localStorage
-// - Au démarrage : relit l'user depuis localStorage (survive au refresh)
-// - Au login/register : sauvegarde dans localStorage
-// - Au logout : efface localStorage → seul moyen de couper la session
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 import { ADMIN_EMAIL, generateId, COUNTRIES_DATA } from "../utils/constants";
 
 const STORAGE_KEY = "bjb_session";
-const SESSION_HOURS = 24 * 7; // Session "Se souvenir de moi" : 7 jours
-const SESSION_SHORT = 2; // Session normale : 2 heures
+const SESSION_HOURS = 24 * 7; 
+const SESSION_SHORT = 2; 
 
 // Données marketplace par défaut intégrées dans le provider
 const DEFAULT_MARKETPLACE = [

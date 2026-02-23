@@ -35,7 +35,7 @@ function Toast({ toast, onClose }) {
     info: "bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]",
   };
   return (
-    <div
+    <main
       className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-5 py-3.5 rounded-2xl border backdrop-blur-xl shadow-2xl ${styles[toast.type || "info"]}`}
       style={{
         animation: "toastIn .3s cubic-bezier(.34,1.4,.64,1) forwards",
@@ -64,7 +64,7 @@ function Toast({ toast, onClose }) {
       >
         <X size={14} />
       </button>
-    </div>
+    </main>
   );
 }
 
@@ -117,7 +117,7 @@ function PromoInput({ price, onDiscount }) {
   };
 
   return (
-    <div className="space-y-2">
+    <main className="space-y-2">
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Tag
@@ -168,7 +168,7 @@ function PromoInput({ price, onDiscount }) {
           )}
         </p>
       )}
-    </div>
+    </main>
   );
 }
 
@@ -182,7 +182,7 @@ function ProductCard({ item, onBuy, onAlert, alertedItems }) {
   const finalPrice = Math.max(0, item.price - discount);
 
   return (
-    <div className="group relative bg-[#111112] border border-white/5 rounded-[1.75rem] overflow-hidden flex flex-col transition-all duration-500 hover:border-[#D4AF37]/25 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+    <main className="group relative bg-[#111112] border border-white/5 rounded-[1.75rem] overflow-hidden flex flex-col transition-all duration-500 hover:border-[#D4AF37]/25 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
       {/* Image */}
       <div className="relative h-52 overflow-hidden bg-[#0A0A0B]">
         <img
@@ -304,7 +304,7 @@ function ProductCard({ item, onBuy, onAlert, alertedItems }) {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -389,7 +389,7 @@ export default function GalerieMarketplace() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] pb-24">
+    <main className="min-h-screen bg-[#0A0A0B] pb-24">
       {/* En-tête */}
       <div className="relative overflow-hidden border-b border-white/5">
         <div
@@ -598,6 +598,6 @@ export default function GalerieMarketplace() {
       </div>
 
       <Toast toast={toast} onClose={() => setToast(null)} />
-    </div>
+    </main>
   );
 }

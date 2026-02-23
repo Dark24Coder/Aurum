@@ -298,7 +298,7 @@ export default function ManagePromos() {
   };
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Stats + bouton */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">
@@ -446,6 +446,6 @@ export default function ManagePromos() {
       {showModal && (
         <CreateModal onClose={() => setShowModal(false)} onCreate={addPromo} />
       )}
-    </div>
+    </main>
   );
 }

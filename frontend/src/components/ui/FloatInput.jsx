@@ -19,7 +19,7 @@ export default function FloatInput({
     (value !== undefined && value !== null && String(value).length > 0);
 
   return (
-    <div className="relative">
+    <main className="relative">
       <div
         className={`relative flex items-center bg-black/40 border rounded-xl transition-all duration-300 ${
           focused
@@ -63,6 +63,6 @@ export default function FloatInput({
         {label}
         {required && <span className="ml-1 text-[#D4AF37]">*</span>}
       </label>
-    </div>
+    </main>
   );
 }

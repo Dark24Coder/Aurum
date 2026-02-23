@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
 import { useAuth } from "../context/useAuth";
-import FloatInput  from "../components/ui/FloatInput";
+import FloatInput from "../components/ui/FloatInput";
 import FloatSelect from "../components/ui/FloatSelect";
 import Button from "../components/ui/Button";
 
@@ -11,10 +11,15 @@ function Register() {
   const { register, authLoading, COUNTRIES_DATA } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm]   = useState(false);
-  const [error, setError]               = useState("");
-  const [form, setForm]                 = useState({
-    name: "", country: "", phoneNumber: "", email: "", password: "", confirmPassword: "",
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    country: "",
+    phoneNumber: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
@@ -27,7 +32,8 @@ function Register() {
     setForm((prev) => ({ ...prev, country: val, phoneNumber: "" }));
   };
 
-  const getPrefix = () => COUNTRIES_DATA.find((c) => c.name === form.country)?.code || "+";
+  const getPrefix = () =>
+    COUNTRIES_DATA.find((c) => c.name === form.country)?.code || "+";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,13 +56,14 @@ function Register() {
     }
   };
 
-  const countryOptions = COUNTRIES_DATA.map((c) => ({ value: c.name, label: c.name }));
+  const countryOptions = COUNTRIES_DATA.map((c) => ({
+    value: c.name,
+    label: c.name,
+  }));
 
   return (
-    /* ── py réduit pour coller à la navbar et au footer ── */
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-6 sm:py-10">
+    <main className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-6 sm:py-10">
       <div className="w-full max-w-md bg-[#161617] border border-white/5 rounded-[2rem] p-7 sm:p-10 shadow-2xl animate-fade-in-up">
-
         <div className="text-center mb-7">
           <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mb-1">
             Inscription
@@ -73,7 +80,14 @@ function Register() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FloatInput label="Nom Complet" name="name" value={form.name} onChange={handleChange} required icon={User} />
+          <FloatInput
+            label="Nom Complet"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            required
+            icon={User}
+          />
 
           <FloatSelect
             label="Pays"
@@ -89,47 +103,88 @@ function Register() {
               {getPrefix()}
             </div>
             <div className="flex-1">
-              <FloatInput label="Téléphone" name="phoneNumber" type="tel" value={form.phoneNumber} onChange={handleChange} required icon={Phone} />
+              <FloatInput
+                label="Téléphone"
+                name="phoneNumber"
+                type="tel"
+                value={form.phoneNumber}
+                onChange={handleChange}
+                required
+                icon={Phone}
+              />
             </div>
           </div>
 
-          <FloatInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} required icon={Mail} />
+          <FloatInput
+            label="Email"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            icon={Mail}
+          />
 
           <FloatInput
-            label="Mot de passe" name="password"
+            label="Mot de passe"
+            name="password"
             type={showPassword ? "text" : "password"}
-            value={form.password} onChange={handleChange} required icon={Lock}
+            value={form.password}
+            onChange={handleChange}
+            required
+            icon={Lock}
             rightElement={
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-600 hover:text-white transition">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-gray-600 hover:text-white transition"
+              >
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             }
           />
 
           <FloatInput
-            label="Confirmer le mot de passe" name="confirmPassword"
+            label="Confirmer le mot de passe"
+            name="confirmPassword"
             type={showConfirm ? "text" : "password"}
-            value={form.confirmPassword} onChange={handleChange} required icon={Lock}
+            value={form.confirmPassword}
+            onChange={handleChange}
+            required
+            icon={Lock}
             rightElement={
-              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-gray-600 hover:text-white transition">
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="text-gray-600 hover:text-white transition"
+              >
                 {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             }
           />
 
-          <Button type="submit" variant="gold" size="full" loading={authLoading} className="mt-2">
+          <Button
+            type="submit"
+            variant="gold"
+            size="full"
+            loading={authLoading}
+            className="mt-2"
+          >
             Créer mon compte
           </Button>
         </form>
 
         <div className="mt-5 text-center text-xs text-gray-400">
           Déjà un compte ?{" "}
-          <Link to="/login" className="text-[#D4AF37] font-bold hover:underline">
+          <Link
+            to="/login"
+            className="text-[#D4AF37] font-bold hover:underline"
+          >
             Se connecter
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 

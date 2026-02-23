@@ -1,6 +1,3 @@
-// src/pages/dashboard/user/UserLayout.jsx
-// ✅ Onglet Groupages ajouté
-// ✅ SidebarContent déclaré EN DEHORS du composant principal (fix "Components created during render")
 import React, { useState } from "react";
 import {
   LayoutDashboard,
@@ -24,7 +21,7 @@ import Profile from "./Profile";
 // ── Sidebar statique — EN DEHORS du composant pour éviter le re-montage ──────
 function SidebarContent({ menuItems, activeTab, onSelect, onLogout }) {
   return (
-    <>
+    <main>
       <div className="mb-10">
         <h2 className="text-xl font-black tracking-tighter uppercase">
           BJ<span className="text-[#D4AF37]">BUSINESS</span>
@@ -64,7 +61,7 @@ function SidebarContent({ menuItems, activeTab, onSelect, onLogout }) {
       >
         <LogOut size={20} /> Déconnexion
       </button>
-    </>
+    </main>
   );
 }
 
@@ -112,7 +109,7 @@ const UserLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col md:flex-row">
+    <main className="min-h-screen bg-[#050505] text-white flex flex-col md:flex-row">
       {/* Sidebar desktop */}
       <aside className="hidden md:flex w-72 bg-[#0A0A0B] border-r border-white/5 flex-col p-6">
         <SidebarContent
@@ -171,7 +168,7 @@ const UserLayout = () => {
           {activeTab === "profile" && <Profile />}
         </div>
       </main>
-    </div>
+    </main>
   );
 };
 

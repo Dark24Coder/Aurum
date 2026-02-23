@@ -8,9 +8,9 @@ const DashboardGuard = () => {
   // 1. Si le contexte charge encore les données, on affiche un loader
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0A0A0B] flex items-center justify-center">
         <Loader2 className="text-[#D4AF37] animate-spin" size={40} />
-      </div>
+      </main>
     );
   }
 

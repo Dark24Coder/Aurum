@@ -76,7 +76,7 @@ function AIChat() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <main className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {isOpen && (
         <div
           className="w-80 rounded-[2rem] overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] animate-fade-in-up"
@@ -173,7 +173,7 @@ function AIChat() {
           className="text-black transition-all duration-300 scale-0 group-hover:scale-100 absolute"
         />
       </button>
-    </div>
+    </main>
   );
 }
 

@@ -101,7 +101,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <main className="min-h-screen bg-[#050505] text-white">
       {/* SIDEBAR DESKTOP */}
       <aside className="hidden md:flex w-64 bg-[#0A0A0B] border-r border-white/5 flex-col fixed top-20 left-0 bottom-0 z-30 overflow-y-auto">
         <div className="p-5 flex flex-col h-full">
@@ -385,6 +385,6 @@ export default function AdminLayout() {
           </div>
         </div>
       </main>
-    </div>
+    </main>
   );
 }

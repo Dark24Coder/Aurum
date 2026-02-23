@@ -2,7 +2,7 @@ import React from "react";
 
 const KYCPolicy = () => {
   return (
-    <div className="max-w-4xl mx-auto p-6 text-gray-300">
+    <main className="max-w-4xl mx-auto p-6 text-gray-300">
       <h1 className="text-3xl font-black text-white mb-6 uppercase tracking-tighter">
         Politique KYC & Vérification
       </h1>
@@ -44,7 +44,7 @@ const KYCPolicy = () => {
           ouvrables. En cas de refus, un motif vous sera communiqué par e-mail.
         </p>
       </section>
-    </div>
+    </main>
   );
 };
 

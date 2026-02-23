@@ -31,7 +31,7 @@ function ProgressBar({ reserved, target }) {
   const color =
     pct >= 90 ? "bg-red-400" : pct >= 60 ? "bg-[#D4AF37]" : "bg-blue-400";
   return (
-    <div>
+    <main>
       <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ${color}`}
@@ -52,7 +52,7 @@ function ProgressBar({ reserved, target }) {
         </span>
         <span className="text-gray-600">{pct}%</span>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -82,7 +82,7 @@ function GroupageCard({ grp, onJoin }) {
   const isClosed = grp.status === "CLOSED" || grp.status === "PARTI";
 
   return (
-    <div className="group bg-[#111112] border border-white/5 rounded-[2rem] overflow-hidden hover:border-[#D4AF37]/25 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col">
+    <main className="group bg-[#111112] border border-white/5 rounded-[2rem] overflow-hidden hover:border-[#D4AF37]/25 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col">
       {/* Image */}
       <div className="relative h-48 overflow-hidden bg-[#0A0A0B]">
         <img
@@ -174,7 +174,7 @@ function GroupageCard({ grp, onJoin }) {
           )}
         </button>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -286,7 +286,7 @@ export default function GroupagePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] pb-24">
+    <main className="min-h-screen bg-[#0A0A0B] pb-24">
       {/* Toast */}
       {toast && (
         <div
@@ -568,6 +568,6 @@ export default function GroupagePage() {
           </div>
         ) : null}
       </div>
-    </div>
+    </main>
   );
 }

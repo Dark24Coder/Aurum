@@ -2,7 +2,7 @@ import React from "react";
 
 const Terms = () => {
   return (
-    <div className="max-w-4xl mx-auto p-6 text-gray-300">
+    <main className="max-w-4xl mx-auto p-6 text-gray-300">
       <h1 className="text-3xl font-black text-white mb-6 uppercase tracking-tighter">
         Conditions Générales d'Utilisation
       </h1>
@@ -50,7 +50,7 @@ const Terms = () => {
           supplémentaires.
         </p>
       </section>
-    </div>
+    </main>
   );
 };
 

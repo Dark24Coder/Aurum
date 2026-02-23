@@ -1,6 +1,3 @@
-// src/pages/dashboard/user/Orders.jsx
-// ✅ FloatInput + FloatSelect — composants custom
-// ✅ Responsive mobile/tablette/desktop
 import { useState, useMemo } from "react";
 import { Search, Package, Filter } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
@@ -46,7 +43,7 @@ const Orders = () => {
   }, [db.orders, currentUser, searchTerm, filterStatus]);
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       <h3 className="text-xl font-black text-white uppercase tracking-tight">
         Historique des Commandes
       </h3>
@@ -191,7 +188,7 @@ const Orders = () => {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

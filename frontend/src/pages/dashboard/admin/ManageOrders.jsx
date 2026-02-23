@@ -71,7 +71,7 @@ export default function ManageOrders() {
   });
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* 🔥 Barre filtre + recherche avec FloatInput */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Recherche avec FloatInput */}
@@ -173,6 +173,6 @@ export default function ManageOrders() {
           ))
         )}
       </div>
-    </div>
+    </main>
   );
 }

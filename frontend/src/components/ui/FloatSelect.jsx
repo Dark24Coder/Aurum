@@ -72,7 +72,7 @@ function FloatSelect({
   };
 
   return (
-    <div className="relative" ref={wrapRef}>
+    <main className="relative" ref={wrapRef}>
       {/* Trigger */}
       <div
         ref={triggerRef}
@@ -172,7 +172,7 @@ function FloatSelect({
         onChange={() => {}}
         required={required}
       />
-    </div>
+    </main>
   );
 }
 

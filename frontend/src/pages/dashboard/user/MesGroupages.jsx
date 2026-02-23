@@ -1,5 +1,3 @@
-// src/pages/dashboard/user/MesGroupages.jsx
-// ✅ Onglet "Mes Groupages" dans le dashboard user
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Users, Ship, Clock, ChevronRight, Package } from "lucide-react";
@@ -16,12 +14,12 @@ function ProgressBar({ reserved, target }) {
   const color =
     pct >= 90 ? "bg-red-400" : pct >= 60 ? "bg-[#D4AF37]" : "bg-blue-400";
   return (
-    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+    <main className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
       <div
         className={`h-full rounded-full ${color}`}
         style={{ width: `${pct}%` }}
       />
-    </div>
+    </main>
   );
 }
 
@@ -44,7 +42,7 @@ export default function MesGroupages() {
 
   if (enriched.length === 0) {
     return (
-      <div className="space-y-6">
+      <main className="space-y-6">
         <h3 className="text-xl font-black text-white uppercase tracking-tight">
           Mes Groupages
         </h3>
@@ -60,12 +58,12 @@ export default function MesGroupages() {
             <Users size={13} /> Voir les groupages ouverts
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-black text-white uppercase tracking-tight">
           Mes Groupages
@@ -189,6 +187,6 @@ export default function MesGroupages() {
           </div>
         ))}
       </div>
-    </div>
+    </main>
   );
 }

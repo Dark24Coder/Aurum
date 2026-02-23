@@ -57,7 +57,7 @@ const Sourcing = ({ currentUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] pt-32 pb-20 px-4">
+    <main className="min-h-screen bg-[#0A0A0B] pt-32 pb-20 px-4">
       <div className="max-w-6xl mx-auto">
         {/* --- HEADER --- */}
         <div className="text-center mb-16 animate-fade-in-up">
@@ -293,12 +293,12 @@ const Sourcing = ({ currentUser }) => {
           </a>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 
 const QualityCard = ({ icon, title, desc }) => (
-  <div className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-[#D4AF37]/20 transition-all group">
+  <main className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-[#D4AF37]/20 transition-all group">
     <div className="text-[#D4AF37] mb-3 group-hover:scale-110 transition-transform">
       {icon}
     </div>
@@ -308,7 +308,7 @@ const QualityCard = ({ icon, title, desc }) => (
     <p className="text-gray-600 text-[9px] font-bold uppercase tracking-widest text-left">
       {desc}
     </p>
-  </div>
+  </main>
 );
 
 const PlatformLink = ({ name, url }) => (

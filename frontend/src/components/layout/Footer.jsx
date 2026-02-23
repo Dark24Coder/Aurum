@@ -23,7 +23,7 @@ function Footer() {
 
   return (
     <footer className="bg-[#0A0A0B] border-t border-white/5 pt-8 pb-6 px-6">
-      <div className="max-w-7xl mx-auto">
+      <main className="max-w-7xl mx-auto">
         {/* ══════════════════════════════════════════════════════════════
             MOBILE  (<md)  : accordéon vertical — espacement réduit
             TABLETTE (md)  : logo centré | 3 colonnes de liens | socials
@@ -226,7 +226,7 @@ function Footer() {
             © 2026 BJBUSINESS. TOUS DROITS RÉSERVÉS.
           </p>
         </div>
-      </div>
+      </main>
     </footer>
   );
 }

@@ -258,7 +258,7 @@ export default function UsersAdmin() {
   const pendingKyc = allUsers.filter((u) => u.kycStatus === "PENDING").length;
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
@@ -459,6 +459,6 @@ export default function UsersAdmin() {
           onCancel={() => setToDelete(null)}
         />
       )}
-    </div>
+    </main>
   );
 }

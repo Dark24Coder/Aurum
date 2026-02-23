@@ -278,7 +278,7 @@ function FloatInput({
     focused ||
     (value !== undefined && value !== null && String(value).length > 0);
   return (
-    <div className="relative">
+    <main className="relative">
       <div
         className={`relative flex items-center bg-black/40 border rounded-xl transition-all duration-300 ${focused ? "border-[#D4AF37]/60 shadow-[0_0_15px_rgba(212,175,55,0.08)]" : "border-white/10"}`}
       >
@@ -316,7 +316,7 @@ function FloatInput({
         {label}
         {required && <span className="ml-1 text-[#D4AF37]">*</span>}
       </label>
-    </div>
+    </main>
   );
 }
 
@@ -374,7 +374,7 @@ function FloatSelect({
   }, [open, scrollContainerRef]);
 
   return (
-    <div className="relative" ref={wrapRef}>
+    <main className="relative" ref={wrapRef}>
       <div
         ref={triggerRef}
         onClick={() => {
@@ -456,7 +456,7 @@ function FloatSelect({
         onChange={() => {}}
         required={required}
       />
-    </div>
+    </main>
   );
 }
 
@@ -508,7 +508,7 @@ const ServiceCard = ({ service, onOpen }) => (
 const ServiceModal = ({ service, onClose, onOpenSim }) => {
   if (!service) return null;
   return (
-    <div
+    <main
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 anim-overlay"
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
@@ -586,7 +586,7 @@ const ServiceModal = ({ service, onClose, onOpenSim }) => {
             ))}
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 
@@ -682,7 +682,7 @@ export default function Home() {
   const loopedServices = [...SERVICES_DATA, ...SERVICES_DATA];
 
   return (
-    <div className="min-h-screen flex flex-col justify-start items-center text-center px-4 sm:px-6 pt-20 relative overflow-hidden">
+    <mmain className="min-h-screen flex flex-col justify-start items-center text-center px-4 sm:px-6 pt-20 relative overflow-hidden">
       <AnimStyles />
 
       <div
@@ -1161,6 +1161,6 @@ export default function Home() {
           setServiceModal(null);
         }}
       />
-    </div>
+    </mmain>
   );
 }
