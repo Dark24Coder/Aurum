@@ -1,3 +1,4 @@
+// src/App.jsx
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,45 +20,61 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import AIChat from "./components/shared/AIChat";
 
-// Pages
+// Pages publiques
 import Home from "./pages/Home";
 import Sourcing from "./pages/Sourcing";
 import Marketplace from "./pages/Marketplace";
 import Groupage from "./pages/Groupage";
+import Suivi from "./pages/Suivi";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import GalerieMarketplace from "./pages/GalerieMarketplace";
 
-// Dashboard
-import UserLayout from "./pages/dashboard/user/UserLayout.jsx";
+// Légales
+import Terms from "./pages/legal/Terms";
+import Privacy from "./pages/legal/Privacy";
+import KYCPolicy from "./pages/legal/KYCPolicy";
+
+// Dashboards
+import UserLayout from "./pages/dashboard/user/UserLayout";
 import AdminLayout from "./pages/dashboard/admin/AdminLayout";
 
-import Terms from "./pages/legal/Terms.jsx";
-import Privacy from "./pages/legal/Privacy.jsx";
-import KYCPolicy from "./pages/legal/KYCPolicy.jsx";
+// Composant d'animation de page
+const MotionDiv = motion.div;
+const PageWrapper = ({ children }) => (
+  <MotionDiv
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -12 }}
+    transition={{ duration: 0.4, ease: "easeInOut" }}
+  >
+    {children}
+  </MotionDiv>
+);
 
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -12 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
-      >
+      <PageWrapper key={location.pathname}>
         <Routes location={location}>
-          {/* --- Routes Publiques --- */}
+          {/* ── Publiques ── */}
           <Route path="/" element={<Home />} />
           <Route path="/sourcing" element={<Sourcing />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/groupage" element={<Groupage />} />
+          <Route path="/suivi" element={<Suivi />} />
+          <Route path="/galerie" element={<GalerieMarketplace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* --- Dashboard --- */}
+          {/* ── Légales ── */}
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/kyc-policy" element={<KYCPolicy />} />
+
+          {/* ── Dashboards ── */}
           <Route
             path="/dashboard/user"
             element={
@@ -74,8 +91,8 @@ function AnimatedRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route path="/galerie" element={<GalerieMarketplace />} />
 
+          {/* ── Redirect /dashboard → bon dashboard selon rôle ── */}
           <Route
             path="/dashboard"
             element={
@@ -84,13 +101,8 @@ function AnimatedRoutes() {
               </ProtectedRoute>
             }
           />
-
-          {/* --- Routes Légales (CORRIGÉES ICI) --- */}
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/kyc-policy" element={<KYCPolicy />} />
         </Routes>
-      </motion.div>
+      </PageWrapper>
     </AnimatePresence>
   );
 }

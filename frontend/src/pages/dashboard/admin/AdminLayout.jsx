@@ -13,6 +13,7 @@ import {
   UserCircle,
   X,
   Tag,
+  Ship,
 } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,7 @@ import ManageMarket from "./ManageMarket";
 import UsersAdmin from "./Users";
 import Settings from "./Settings";
 import ManagePromos from "./ManagePromos";
+import ManageGroupages from "./ManageGroupages";
 
 const TABS = [
   { id: "overview", label: "Vue d'ensemble", icon: LayoutDashboard },
@@ -32,6 +34,7 @@ const TABS = [
   { id: "marketplace", label: "Marketplace", icon: Store },
   { id: "users", label: "Utilisateurs", icon: Users },
   { id: "promos", label: "Promos", icon: Tag },
+  { id: "groupages", label: "Groupages", icon: Ship },
   { id: "settings", label: "Configuration", icon: SettingsIcon },
 ];
 
@@ -378,6 +381,7 @@ export default function AdminLayout() {
             {activeTab === "users" && <UsersAdmin />}
             {activeTab === "settings" && <Settings />}
             {activeTab === "promos" && <ManagePromos />}
+            {activeTab === "groupages" && <ManageGroupages />}
           </div>
         </div>
       </main>

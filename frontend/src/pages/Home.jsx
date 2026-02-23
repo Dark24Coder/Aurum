@@ -30,36 +30,90 @@ const SERVICES_DATA = [
     desc: "Nous trouvons les meilleurs fournisseurs certifiés pour vos produits.",
     icon: <Globe className="text-[#D4AF37]" size={24} />,
     tag: "Expertise",
+    modalDesc:
+      "Notre équipe basée en Chine sélectionne et audite les fournisseurs pour vous. Vous recevez des devis comparatifs, des photos d'inspection et une validation qualité avant expédition.",
+    points: [
+      "Recherche fournisseur sous 48h",
+      "Inspection produit et photos avant envoi",
+      "Négociation des prix en votre nom",
+      "Accompagnement jusqu'à la livraison",
+    ],
+    cta: { label: "Lancer un sourcing", to: "/register" },
   },
   {
     title: "Commission 1%",
     desc: "La transparence totale. Pas de frais cachés, juste une commission fixe.",
     icon: <Coins className="text-[#D4AF37]" size={24} />,
     tag: "Économie",
+    modalDesc:
+      "Contrairement aux intermédiaires classiques qui prennent 5 à 15%, BJ Business applique une commission fixe et transparente de 1% sur la valeur de vos achats. Tout est détaillé dans votre espace client.",
+    points: [
+      "1% sur la valeur d'achat, rien de plus",
+      "Frais de transport facturés au réel",
+      "Récapitulatif complet dans le dashboard",
+      "Aucun abonnement, aucun frais fixe",
+    ],
+    cta: { label: "Créer un compte", to: "/register" },
   },
   {
     title: "Logistique Rapide",
     desc: "Expédition par avion ou bateau avec suivi en temps réel complet.",
     icon: <Zap className="text-[#D4AF37]" size={24} />,
     tag: "Vitesse",
+    modalDesc:
+      "Nous gérons l'expédition de bout en bout : dédouanement, transit et livraison finale à Cotonou ou votre ville. Chaque colis obtient un numéro de suivi unique consultable 24h/24.",
+    points: [
+      "Voie aérienne : 15 à 21 jours",
+      "Voie maritime : 30 à 45 jours",
+      "Suivi en temps réel depuis /suivi",
+      "Dédouanement inclus dans nos services",
+    ],
+    cta: { label: "Estimer mes frais", to: null, action: "sim" },
   },
   {
     title: "Sécurité Totale",
     desc: "Vos fonds et marchandises sont protégés par l'Aurum Protocol.",
     icon: <ShieldCheck className="text-[#D4AF37]" size={24} />,
     tag: "Confiance",
+    modalDesc:
+      "L'Aurum Protocol garantit que vos fonds ne sont débloqués au fournisseur qu'après validation des photos d'inspection. En cas de litige, notre équipe intervient en médiateur.",
+    points: [
+      "Fonds sécurisés jusqu'à validation",
+      "KYC obligatoire pour tous les membres",
+      "Caution remboursable à tout moment",
+      "Médiation gratuite en cas de litige",
+    ],
+    cta: { label: "En savoir plus", to: "/register" },
   },
   {
     title: "Groupage",
     desc: "Participez à des achats groupés pour réduire vos coûts d'importation.",
     icon: <Package className="text-[#D4AF37]" size={24} />,
     tag: "Économies",
+    modalDesc:
+      "Le groupage vous permet de partager un conteneur avec d'autres importateurs. Vous ne payez que votre portion réelle du volume, ce qui peut diviser vos frais de transport par 3 ou 4.",
+    points: [
+      "Partage des frais de conteneur",
+      "Économies jusqu'à 70% sur le fret",
+      "Conteneurs ouverts toutes les 2 semaines",
+      "Suivi dédié par groupage",
+    ],
+    cta: { label: "Voir les groupages", to: "/groupage" },
   },
   {
     title: "Marketplace",
     desc: "Achetez et vendez des produits déjà importés en toute sécurité.",
     icon: <TrendingUp className="text-[#D4AF37]" size={24} />,
     tag: "Commerce",
+    modalDesc:
+      "Notre marketplace regroupe des produits déjà importés et disponibles immédiatement au Bénin. Achetez sans attendre les délais d'expédition, ou vendez vos propres stocks importés.",
+    points: [
+      "Livraison immédiate depuis le stock local",
+      "Produits vérifiés par l'équipe BJ Business",
+      "Paiement sécurisé via l'Aurum Protocol",
+      "Vendeurs certifiés KYC uniquement",
+    ],
+    cta: { label: "Explorer la marketplace", to: "/marketplace" },
   },
 ];
 
@@ -185,6 +239,25 @@ const AnimStyles = () => (
     .custom-scroll::-webkit-scrollbar       { width:3px }
     .custom-scroll::-webkit-scrollbar-track { background:transparent }
     .custom-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.07);border-radius:99px }
+    @keyframes badgePulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(212,175,55,0); opacity:1; }
+      50%      { box-shadow:0 0 0 6px rgba(212,175,55,0.18); opacity:0.85; }
+    }
+    .badge-gold {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 14px;
+      border-radius:999px;
+      background:rgba(212,175,55,0.08);
+      border:1px solid rgba(212,175,55,0.3);
+      color:#D4AF37;
+      font-size:10px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:0.15em;
+      animation:badgePulse 2s ease-in-out infinite;
+    }
   `}</style>
 );
 
@@ -405,8 +478,11 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const ServiceCard = ({ service }) => (
-  <div className="min-w-[280px] sm:min-w-[320px] group relative p-8 rounded-[2.5rem] bg-[#111112] border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-500 overflow-hidden mx-3">
+const ServiceCard = ({ service, onOpen }) => (
+  <div
+    onClick={() => onOpen(service)}
+    className="min-w-[280px] sm:min-w-[320px] group relative p-8 rounded-[2.5rem] bg-[#111112] border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-500 overflow-hidden mx-3 cursor-pointer"
+  >
     <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     <div className="relative z-10 flex flex-col items-start text-left">
       <div className="mb-6 p-4 rounded-2xl bg-black/40 border border-white/5 group-hover:scale-110 transition-transform duration-500">
@@ -428,6 +504,92 @@ const ServiceCard = ({ service }) => (
   </div>
 );
 
+/* ── Modal détail service ──────────────────────────────────────────────────── */
+const ServiceModal = ({ service, onClose, onOpenSim }) => {
+  if (!service) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 anim-overlay"
+      style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-[#111112] border border-white/10 rounded-2xl sm:rounded-3xl w-full max-w-lg shadow-2xl anim-modal max-h-[92vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-white/5 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-black/40 border border-white/5">
+              {service.icon}
+            </div>
+            <div>
+              <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest opacity-60">
+                {service.tag}
+              </span>
+              <h3 className="text-base font-black text-white uppercase tracking-tight leading-tight">
+                {service.title}
+              </h3>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Corps */}
+        <div className="overflow-y-auto custom-scroll flex-1 p-5 sm:p-6 space-y-5">
+          {/* Description longue */}
+          <p className="text-gray-400 text-sm leading-relaxed">
+            {service.modalDesc}
+          </p>
+
+          {/* Points clés */}
+          <div className="bg-white/3 border border-white/5 rounded-2xl p-4 sm:p-5 space-y-3">
+            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+              Ce que vous obtenez
+            </div>
+            {service.points.map((pt, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <CheckCircle size={11} className="text-[#D4AF37]" />
+                </div>
+                <span className="text-white text-sm font-medium leading-relaxed">
+                  {pt}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          {service.cta &&
+            (service.cta.action === "sim" ? (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenSim();
+                }}
+                className="w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: "#D4AF37", color: "#0A0A0B" }}
+              >
+                {service.cta.label} <ArrowRight size={13} />
+              </button>
+            ) : (
+              <Link
+                to={service.cta.to || "/register"}
+                onClick={onClose}
+                className="w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: "#D4AF37", color: "#0A0A0B" }}
+              >
+                {service.cta.label} <ArrowRight size={13} />
+              </Link>
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -435,6 +597,7 @@ export default function Home() {
   const [searched, setSearched] = useState(false);
 
   const [simOpen, setSimOpen] = useState(false);
+  const [serviceModal, setServiceModal] = useState(null); // service sélectionné pour le modal
   const [tab, setTab] = useState("calc");
   const [mode, setMode] = useState("AIR");
   const [category, setCategory] = useState("NORMAL");
@@ -590,13 +753,13 @@ export default function Home() {
           </h2>
           <div className="h-[1px] flex-1 bg-white/5 mx-6 hidden sm:block" />
           <span className="text-gray-600 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] hidden sm:block">
-            Auto-scroll
+            Cliquez pour en savoir plus
           </span>
         </div>
         <div className="slider-wrapper w-full py-4">
           <div className="slider-track">
             {loopedServices.map((s, i) => (
-              <ServiceCard key={i} service={s} />
+              <ServiceCard key={i} service={s} onOpen={setServiceModal} />
             ))}
           </div>
         </div>
@@ -989,6 +1152,15 @@ export default function Home() {
           </div>
         </div>
       )}
+      {/* ═══ MODAL SERVICE ═══════════════════════════════════════════════════ */}
+      <ServiceModal
+        service={serviceModal}
+        onClose={() => setServiceModal(null)}
+        onOpenSim={() => {
+          setSimOpen(true);
+          setServiceModal(null);
+        }}
+      />
     </div>
   );
 }

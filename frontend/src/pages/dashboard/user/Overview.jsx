@@ -10,6 +10,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
+import { Link } from "react-router-dom";
 import { formatCurrency, CAUTION_AMOUNT } from "../../../utils/constants";
 import StatusBadge from "../components/StatusBadge";
 import StatsCard from "../components/StatsCard";
@@ -120,20 +121,20 @@ const Overview = ({ setActiveTab }) => {
           <h3 className="text-sm font-black uppercase tracking-widest text-white/50">
             Accès Rapide
           </h3>
-          <a
-            href="/marketplace"
+          <Link
+            to="/marketplace"
             className="w-full p-4 rounded-2xl bg-white/5 hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] hover:border-[#D4AF37]/20 border border-transparent transition-all flex items-center gap-3 text-sm font-bold text-gray-300"
           >
             <ShoppingBag size={18} /> Marketplace
             <ArrowRight size={14} className="ml-auto" />
-          </a>
-          <a
-            href="/groupage"
+          </Link>
+          <Link
+            to="/groupage"
             className="w-full p-4 rounded-2xl bg-white/5 hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] hover:border-[#D4AF37]/20 border border-transparent transition-all flex items-center gap-3 text-sm font-bold text-gray-300"
           >
             <Users size={18} /> Groupages
             <ArrowRight size={14} className="ml-auto" />
-          </a>
+          </Link>
           <button
             onClick={() => setActiveTab("orders")}
             className="w-full p-4 rounded-2xl bg-white/5 hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] hover:border-[#D4AF37]/20 border border-transparent transition-all flex items-center gap-3 text-sm font-bold text-gray-300"
@@ -150,12 +151,12 @@ const Overview = ({ setActiveTab }) => {
             <p className="text-xs font-medium mb-5 opacity-70">
               Trouvez les meilleurs fournisseurs en Chine avec notre équipe.
             </p>
-            <a
-              href="/sourcing"
+            <Link
+              to="/sourcing"
               className="block w-full py-2.5 bg-black text-white rounded-xl text-xs font-black uppercase text-center hover:scale-105 transition-transform"
             >
               Démarrer
-            </a>
+            </Link>
           </div>
         </div>
       </div>

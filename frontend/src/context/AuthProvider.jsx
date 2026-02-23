@@ -8,6 +8,8 @@ import { AuthContext } from "./AuthContext";
 import { ADMIN_EMAIL, generateId, COUNTRIES_DATA } from "../utils/constants";
 
 const STORAGE_KEY = "bjb_session";
+const SESSION_HOURS = 24 * 7; // Session "Se souvenir de moi" : 7 jours
+const SESSION_SHORT = 2; // Session normale : 2 heures
 
 // Données marketplace par défaut intégrées dans le provider
 const DEFAULT_MARKETPLACE = [
@@ -143,26 +145,50 @@ const DEFAULT_DB = {
   ],
 };
 
-// ── Lecture sécurisée localStorage ───────────────────────────────────────────
+// ── Lecture sécurisée localStorage avec vérification expiration ─────────────
 function readSession() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    // Vérifier si la session a expiré
+    if (session.expiresAt && Date.now() > session.expiresAt) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return session.user || null;
   } catch {
+    localStorage.removeItem(STORAGE_KEY);
     return null;
   }
 }
 
-// ── Écriture sécurisée localStorage ──────────────────────────────────────────
-function writeSession(user) {
+// ── Écriture sécurisée localStorage avec timestamp d'expiration ──────────────
+function writeSession(user, rememberMe = false) {
   try {
     if (user) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      const hours = rememberMe ? SESSION_HOURS : SESSION_SHORT;
+      const expiresAt = Date.now() + hours * 60 * 60 * 1000;
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ user, expiresAt, rememberMe }),
+      );
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
   } catch {
     /* quota dépassé etc. */
+  }
+}
+
+// ── Lire si "rememberMe" était activé (pour prolonger la session au refresh) ─
+function getSessionMeta() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw);
+  } catch {
+    return {};
   }
 }
 
@@ -174,8 +200,14 @@ export const AuthProvider = ({ children }) => {
   const [db, setDb] = useState(DEFAULT_DB);
 
   // ── Synchronise localStorage à chaque changement de currentUser ───────────
+  // Conserve le rememberMe d'origine pour ne pas raccourcir une session longue
   useEffect(() => {
-    writeSession(currentUser);
+    if (currentUser) {
+      const meta = getSessionMeta();
+      writeSession(currentUser, meta.rememberMe || false);
+    } else {
+      writeSession(null);
+    }
   }, [currentUser]);
 
   const isAdmin = useMemo(
@@ -192,7 +224,7 @@ export const AuthProvider = ({ children }) => {
   }, [db.notifications, currentUser]);
 
   // ── LOGIN ─────────────────────────────────────────────────────────────────
-  const login = useCallback(async (email) => {
+  const login = useCallback(async (email, password, rememberMe = false) => {
     setAuthLoading(true);
     setAuthError("");
     return new Promise((resolve) => {
@@ -209,7 +241,9 @@ export const AuthProvider = ({ children }) => {
           phone: "",
           country: "",
         };
-        setCurrentUser(user); // ← useEffect écrit dans localStorage
+        // Écrire en localStorage immédiatement avec rememberMe
+        writeSession(user, rememberMe);
+        setCurrentUser(user);
         setAuthLoading(false);
         resolve({ success: true, role });
       }, 1000);
