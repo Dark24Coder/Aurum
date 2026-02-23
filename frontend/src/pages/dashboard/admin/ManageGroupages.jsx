@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import FloatInput from "../../../components/ui/FloatInput";
 import FloatSelect from "../../../components/ui/FloatSelect";
+import { useConfirm } from "../../../components/ui/useConfirm";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "XOF" }).format(
@@ -104,7 +105,7 @@ function CreateModal({ onClose, onCreate }) {
   };
 
   return (
-    <main
+    <div
       className="fixed inset-0 z-[500] flex items-center justify-center p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
@@ -230,7 +231,7 @@ function CreateModal({ onClose, onCreate }) {
           </button>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -240,7 +241,7 @@ function GroupageRow({ grp, onStatusChange, onDelete, participants }) {
   const pct = Math.min(100, Math.round((grp.reserved / grp.target) * 100));
 
   return (
-    <main
+    <div
       className={`bg-[#111112] border rounded-2xl overflow-hidden transition-colors ${grp.status === "OUVERT" ? "border-white/5 hover:border-white/10" : "border-white/3 opacity-70"}`}
     >
       {/* Ligne principale */}
@@ -315,7 +316,7 @@ function GroupageRow({ grp, onStatusChange, onDelete, participants }) {
           )}
           {/* Supprimer */}
           <button
-            onClick={() => onDelete(grp.id)}
+            onClick={() => onDelete(grp.id, grp.name)}
             className="p-2 rounded-xl text-red-500/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
             title="Supprimer"
           >
@@ -356,13 +357,14 @@ function GroupageRow({ grp, onStatusChange, onDelete, participants }) {
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }
 
 // ── Page principale ────────────────────────────────────────────────────────────
 export default function ManageGroupages() {
   const { db, setDb } = useAuth();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [showModal, setShowModal] = useState(false);
 
   const groupages = db.groupages || [];
@@ -379,13 +381,14 @@ export default function ManageGroupages() {
       ),
     }));
 
-  const deleteGroupage = (id) => {
-    if (
-      !window.confirm(
-        "Supprimer ce groupage ? Les commandes associées restent dans le système.",
-      )
-    )
-      return;
+  const deleteGroupage = async (id, name) => {
+    const ok = await confirm({
+      title: "Supprimer le groupage",
+      message: `Supprimer "${name}" ? Les commandes associées restent dans le système.`,
+      confirmLabel: "Supprimer",
+      variant: "danger",
+    });
+    if (!ok) return;
     setDb((prev) => ({
       ...prev,
       groupages: prev.groupages.filter((g) => g.id !== id),
@@ -402,6 +405,7 @@ export default function ManageGroupages() {
 
   return (
     <main className="space-y-6">
+      {ConfirmDialog}
       {/* Stats + bouton */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">

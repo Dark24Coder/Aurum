@@ -682,7 +682,7 @@ export default function Home() {
   const loopedServices = [...SERVICES_DATA, ...SERVICES_DATA];
 
   return (
-    <mmain className="min-h-screen flex flex-col justify-start items-center text-center px-4 sm:px-6 pt-20 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col justify-start items-center text-center px-4 sm:px-6 pt-20 relative overflow-hidden">
       <AnimStyles />
 
       <div
@@ -1161,6 +1161,6 @@ export default function Home() {
           setServiceModal(null);
         }}
       />
-    </mmain>
+    </main>
   );
 }

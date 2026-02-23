@@ -1,7 +1,8 @@
 // src/pages/dashboard/admin/ManageMarket.jsx
-// ✅ Ajout produit via modal (formulaire complet)
-// ✅ Toggle disponible/rupture, suppression
-import { useState } from "react";
+// ✅ CRUD complet : Ajouter / Modifier / Supprimer / Toggle statut
+// ✅ Upload image local (FileReader → base64) + URL externe
+// ✅ ConfirmDialog custom — zero window.confirm
+import { useState, useRef } from "react";
 import {
   Store,
   Search,
@@ -11,25 +12,15 @@ import {
   Trash2,
   Plus,
   Image as ImageIcon,
-  Tag, // 🔥 Import pour FloatSelect
+  Pencil,
+  Upload,
 } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
 import { formatCurrency, generateId } from "../../../utils/constants";
-
-// 🔥 Import des composants
-import FloatInput from "../../../components/ui/FloatInput";
-import FloatSelect from "../../../components/ui/FloatSelect";
+import { useConfirm } from "../../../components/ui/useConfirm";
 
 const CATEGORIES_LIST = ["ELECTRONIQUE", "MODE", "MAISON", "AUTO"];
-
-// 🔥 Options pour FloatSelect
-const CATEGORY_OPTIONS = [
-  { value: "TOUT", label: "Toutes catégories" },
-  { value: "ELECTRONIQUE", label: "Électronique" },
-  { value: "MODE", label: "Mode" },
-  { value: "MAISON", label: "Maison" },
-  { value: "AUTO", label: "Auto" },
-];
+const FILTER_CATS = ["TOUT", ...CATEGORIES_LIST];
 
 const STATUS_STYLES = {
   ACTIVE: "text-green-400 bg-green-500/10 border-green-500/20",
@@ -45,12 +36,41 @@ const EMPTY_FORM = {
   status: "ACTIVE",
 };
 
-// ── Modal ajout produit ───────────────────────────────────────────────────────
-function AddProductModal({ onClose, onAdd }) {
-  const [form, setForm] = useState(EMPTY_FORM);
+const inputCls =
+  "w-full bg-[#0A0A0B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-[#D4AF37]/50 transition-colors";
+
+// ── Modal ajout / édition produit ─────────────────────────────────────────────
+function ProductModal({ initial, onClose, onSave, title }) {
+  const [form, setForm] = useState(initial || EMPTY_FORM);
   const [error, setError] = useState("");
+  const [imgMode, setImgMode] = useState("url"); // "url" | "upload"
+  const [preview, setPreview] = useState(initial?.img || "");
+  const fileRef = useRef(null);
 
   const change = (field, val) => setForm((p) => ({ ...p, [field]: val }));
+
+  // Upload image locale → base64
+  const handleFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/"))
+      return setError("Fichier non valide — images uniquement.");
+    if (file.size > 5 * 1024 * 1024)
+      return setError("Image trop lourde (max 5 Mo).");
+    setError("");
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const b64 = ev.target.result;
+      setPreview(b64);
+      change("img", b64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUrlChange = (val) => {
+    change("img", val);
+    setPreview(val);
+  };
 
   const submit = () => {
     if (!form.name.trim()) return setError("Le nom est requis.");
@@ -58,35 +78,21 @@ function AddProductModal({ onClose, onAdd }) {
       return setError("Entrez un prix valide (en FCFA).");
     if (!form.desc.trim()) return setError("La description est requise.");
     setError("");
-    onAdd({
-      ...form,
-      price: parseInt(form.price, 10),
-      img:
-        form.img.trim() ||
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=400",
-      id: generateId("MK"),
-      sellerId: "ADMIN-01",
-    });
+    onSave({ ...form, price: parseInt(form.price, 10) });
     onClose();
   };
-
-  const inputCls =
-    "w-full bg-[#0A0A0B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-[#D4AF37]/50 transition-colors";
 
   return (
     <div
       className="fixed inset-0 z-[500] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        className="absolute inset-0 bg-black/85 backdrop-blur-md"
-        onClick={onClose}
-      />
-      <div className="relative bg-[#111112] border border-[#D4AF37]/20 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="bg-[#111112] border border-[#D4AF37]/20 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 flex-shrink-0">
           <h3 className="font-black text-white uppercase tracking-tight text-lg">
-            Ajouter un produit
+            {title}
           </h3>
           <button
             onClick={onClose}
@@ -99,10 +105,10 @@ function AddProductModal({ onClose, onAdd }) {
         {/* Body */}
         <div className="p-6 space-y-4 overflow-y-auto flex-1">
           {/* Preview image */}
-          <div className="aspect-video bg-[#0A0A0B] border border-white/10 rounded-2xl flex items-center justify-center overflow-hidden">
-            {form.img ? (
+          <div className="aspect-video bg-[#0A0A0B] border border-white/10 rounded-2xl flex items-center justify-center overflow-hidden relative group">
+            {preview ? (
               <img
-                src={form.img}
+                src={preview}
                 alt="preview"
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -117,47 +123,121 @@ function AddProductModal({ onClose, onAdd }) {
             )}
           </div>
 
-          {/* URL image */}
-          <FloatInput
-            label="URL Image"
-            name="img"
-            type="url"
-            value={form.img}
-            onChange={(e) => change("img", e.target.value)}
-            icon={ImageIcon}
-            placeholder="https://images.unsplash.com/..."
-          />
+          {/* Toggle mode image */}
+          <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 gap-1">
+            {[
+              { id: "url", label: "URL externe" },
+              { id: "upload", label: "Image locale" },
+            ].map((m) => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  setImgMode(m.id);
+                  setError("");
+                }}
+                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wide transition-all ${
+                  imgMode === m.id
+                    ? "bg-[#D4AF37] text-black"
+                    : "text-gray-500 hover:text-white"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
 
-          {/* Nom du produit */}
-          <FloatInput
-            label="Nom du produit *"
-            name="name"
-            value={form.name}
-            onChange={(e) => change("name", e.target.value)}
-            icon={Store}
-            required
-          />
+          {/* Input image selon mode */}
+          {imgMode === "url" ? (
+            <div>
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+                URL Image{" "}
+                <span className="text-gray-700 font-normal normal-case">
+                  (optionnel)
+                </span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://images.unsplash.com/..."
+                value={form.img.startsWith("data:") ? "" : form.img}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+                Fichier image{" "}
+                <span className="text-gray-700 font-normal normal-case">
+                  (JPG, PNG, WEBP — max 5 Mo)
+                </span>
+              </label>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="w-full bg-[#0A0A0B] border border-dashed border-white/20 rounded-xl px-4 py-4 text-sm text-gray-500 hover:text-white hover:border-[#D4AF37]/40 transition-all flex items-center justify-center gap-2"
+              >
+                <Upload size={16} className="text-[#D4AF37]" />
+                <span className="font-bold">Choisir un fichier</span>
+                {form.img.startsWith("data:") && (
+                  <span className="text-[10px] text-green-400 font-black ml-2">
+                    ✓ Image chargée
+                  </span>
+                )}
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFile}
+              />
+            </div>
+          )}
+
+          {/* Nom */}
+          <div>
+            <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+              Nom du produit *
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: AirPods Pro 2"
+              value={form.name}
+              onChange={(e) => change("name", e.target.value)}
+              className={inputCls}
+            />
+          </div>
 
           {/* Catégorie + Prix */}
           <div className="grid grid-cols-2 gap-3">
-            <FloatSelect
-              label="Catégorie *"
-              value={form.category}
-              onChange={(val) => change("category", val)}
-              options={CATEGORY_OPTIONS.filter((opt) => opt.value !== "TOUT")}
-              icon={Tag}
-              required
-            />
-            <FloatInput
-              label="Prix (FCFA) *"
-              name="price"
-              type="number"
-              min="0"
-              value={form.price}
-              onChange={(e) => change("price", e.target.value)}
-              icon={Store}
-              required
-            />
+            <div>
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+                Catégorie *
+              </label>
+              <select
+                value={form.category}
+                onChange={(e) => change("category", e.target.value)}
+                className={inputCls + " cursor-pointer bg-[#0A0A0B]"}
+              >
+                {CATEGORIES_LIST.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
+                Prix (FCFA) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Ex: 35000"
+                value={form.price}
+                onChange={(e) => change("price", e.target.value)}
+                className={inputCls}
+              />
+            </div>
           </div>
 
           {/* Description */}
@@ -174,10 +254,10 @@ function AddProductModal({ onClose, onAdd }) {
             />
           </div>
 
-          {/* Statut initial */}
+          {/* Statut */}
           <div>
             <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2 block">
-              Statut initial
+              Statut
             </label>
             <div className="flex gap-3">
               {[
@@ -214,7 +294,7 @@ function AddProductModal({ onClose, onAdd }) {
             onClick={submit}
             className="w-full py-3.5 bg-[#D4AF37] text-black font-black uppercase text-[11px] tracking-widest rounded-xl hover:opacity-90 transition-opacity"
           >
-            Publier sur la Marketplace
+            {title}
           </button>
         </div>
       </div>
@@ -225,9 +305,11 @@ function AddProductModal({ onClose, onAdd }) {
 // ── PAGE PRINCIPALE ───────────────────────────────────────────────────────────
 export default function ManageMarket() {
   const { db, setDb } = useAuth();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [search, setSearch] = useState("");
   const [catFilter, setCat] = useState("TOUT");
-  const [showModal, setShowModal] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editItem, setEditItem] = useState(null); // item en cours d'édition
 
   const marketplace = db.marketplace || [];
 
@@ -249,16 +331,38 @@ export default function ManageMarket() {
     }));
   };
 
-  const deleteItem = (id) => {
-    if (!window.confirm("Supprimer ce produit ?")) return;
+  const deleteItem = async (id, name) => {
+    const ok = await confirm({
+      title: "Supprimer le produit",
+      message: `Êtes-vous sûr de vouloir supprimer "${name}" ? Cette action est irréversible.`,
+      confirmLabel: "Supprimer",
+      variant: "danger",
+    });
+    if (!ok) return;
     setDb((prev) => ({
       ...prev,
       marketplace: prev.marketplace.filter((i) => i.id !== id),
     }));
   };
 
-  const addProduct = (newItem) => {
-    setDb((prev) => ({ ...prev, marketplace: [newItem, ...prev.marketplace] }));
+  const addProduct = (data) => {
+    setDb((prev) => ({
+      ...prev,
+      marketplace: [
+        { ...data, id: generateId("MK"), sellerId: "ADMIN-01" },
+        ...prev.marketplace,
+      ],
+    }));
+  };
+
+  const updateProduct = (data) => {
+    setDb((prev) => ({
+      ...prev,
+      marketplace: prev.marketplace.map((i) =>
+        i.id === editItem.id ? { ...i, ...data } : i,
+      ),
+    }));
+    setEditItem(null);
   };
 
   const activeCount = marketplace.filter((i) => i.status === "ACTIVE").length;
@@ -266,6 +370,8 @@ export default function ManageMarket() {
 
   return (
     <main className="space-y-6">
+      {ConfirmDialog}
+
       {/* Stats + bouton ajout */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">
@@ -288,50 +394,59 @@ export default function ManageMarket() {
           ))}
         </div>
 
-        {/* Bouton ajouter */}
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowAdd(true)}
           className="flex items-center gap-2 px-5 py-3 bg-[#D4AF37] text-black font-black uppercase text-[11px] tracking-widest rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
         >
           <Plus size={15} /> Ajouter produit
         </button>
       </div>
 
-      {/* Filtres avec FloatInput et FloatSelect */}
+      {/* Filtres */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* 🔥 Recherche avec FloatInput */}
-        <div className="flex-1">
-          <FloatInput
-            label="Rechercher un produit..."
-            name="search"
+        <div className="relative flex-1">
+          <Search
+            size={14}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500"
+          />
+          <input
+            type="text"
+            placeholder="Rechercher un produit…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            icon={Search}
+            className="w-full bg-[#111112] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:border-[#D4AF37]/40 transition-colors"
           />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+            >
+              <X size={13} />
+            </button>
+          )}
         </div>
-
-        {/* 🔥 Filtre catégorie avec FloatSelect */}
-        <div className="w-64">
-          <FloatSelect
-            label="Catégorie"
-            value={catFilter}
-            onChange={setCat}
-            options={CATEGORY_OPTIONS}
-            icon={Tag}
-          />
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+          {FILTER_CATS.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCat(cat)}
+              className={`px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all flex-shrink-0 ${
+                catFilter === cat
+                  ? "bg-[#D4AF37] text-black"
+                  : "bg-[#111112] border border-white/10 text-gray-400 hover:text-white"
+              }`}
+            >
+              {cat === "TOUT" ? "Tout" : cat}
+            </button>
+          ))}
         </div>
-      </div>
-
-      {/* Compteur de résultats */}
-      <div className="text-[11px] text-gray-500 font-bold">
-        {filtered.length} produit{filtered.length > 1 ? "s" : ""} trouvé
-        {filtered.length > 1 ? "s" : ""}
       </div>
 
       {/* Table */}
       <div className="bg-[#111112] border border-white/5 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm min-w-[640px]">
+          <table className="w-full text-left text-sm min-w-[680px]">
             <thead>
               <tr className="border-b border-white/5 bg-white/3">
                 {["Produit", "Catégorie", "Prix", "Statut", "Actions"].map(
@@ -356,7 +471,7 @@ export default function ManageMarket() {
                     <Store size={30} className="mx-auto mb-3 opacity-30" />
                     <p className="text-sm">Aucun produit trouvé</p>
                     <button
-                      onClick={() => setShowModal(true)}
+                      onClick={() => setShowAdd(true)}
                       className="mt-3 px-4 py-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] font-black text-[10px] uppercase tracking-widest hover:bg-[#D4AF37]/20 transition-colors"
                     >
                       Ajouter le premier produit
@@ -404,9 +519,22 @@ export default function ManageMarket() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
+                        {/* Modifier */}
+                        <button
+                          onClick={() => setEditItem(item)}
+                          className="p-2 rounded-lg bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all"
+                          title="Modifier"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        {/* Toggle statut */}
                         <button
                           onClick={() => toggleStatus(item.id)}
-                          className={`p-2 rounded-lg transition-all ${item.status === "ACTIVE" ? "bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white" : "bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-black"}`}
+                          className={`p-2 rounded-lg transition-all ${
+                            item.status === "ACTIVE"
+                              ? "bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white"
+                              : "bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-black"
+                          }`}
                           title={
                             item.status === "ACTIVE"
                               ? "Passer en rupture"
@@ -419,8 +547,9 @@ export default function ManageMarket() {
                             <Eye size={14} />
                           )}
                         </button>
+                        {/* Supprimer */}
                         <button
-                          onClick={() => deleteItem(item.id)}
+                          onClick={() => deleteItem(item.id, item.name)}
                           className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
                           title="Supprimer"
                         >
@@ -436,10 +565,22 @@ export default function ManageMarket() {
         </div>
       </div>
 
-      {showModal && (
-        <AddProductModal
-          onClose={() => setShowModal(false)}
-          onAdd={addProduct}
+      {/* Modal ajout */}
+      {showAdd && (
+        <ProductModal
+          title="Ajouter un produit"
+          onClose={() => setShowAdd(false)}
+          onSave={addProduct}
+        />
+      )}
+
+      {/* Modal édition */}
+      {editItem && (
+        <ProductModal
+          title="Modifier le produit"
+          initial={{ ...editItem, price: String(editItem.price) }}
+          onClose={() => setEditItem(null)}
+          onSave={updateProduct}
         />
       )}
     </main>

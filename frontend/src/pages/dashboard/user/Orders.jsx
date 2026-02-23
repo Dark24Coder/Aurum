@@ -1,3 +1,6 @@
+// src/pages/dashboard/user/Orders.jsx
+// ✅ FloatInput + FloatSelect — composants custom
+// ✅ Responsive mobile/tablette/desktop
 import { useState, useMemo } from "react";
 import { Search, Package, Filter } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
@@ -33,9 +36,13 @@ const Orders = () => {
   const userOrders = useMemo(() => {
     return (db.orders || []).filter((order) => {
       const matchesUser = order.userId === currentUser?.uid;
+      const term = searchTerm.toLowerCase().trim();
       const matchesSearch =
-        order.product?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.id?.toLowerCase().includes(searchTerm.toLowerCase());
+        !term ||
+        order.product?.toLowerCase().includes(term) ||
+        order.id?.toLowerCase().includes(term) ||
+        order.trackingInternal?.toLowerCase().includes(term) ||
+        order.trackingCarrier?.toLowerCase().includes(term);
       const matchesFilter =
         filterStatus === "ALL" || order.status === filterStatus;
       return matchesUser && matchesSearch && matchesFilter;

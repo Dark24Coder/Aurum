@@ -1,5 +1,5 @@
 // src/pages/dashboard/admin/AdminOverview.jsx
-import { useState } from "react";
+// Version améliorée avec graphique barres, stats enrichies, actions rapides
 import { useAuth } from "../../../context/useAuth";
 import { formatCurrency } from "../../../utils/constants";
 import {
@@ -10,15 +10,7 @@ import {
   AlertTriangle,
   ShoppingCart,
   ArrowUpRight,
-  Calendar,
-  BarChart,
-  Search,
-  Filter,
 } from "lucide-react";
-
-// 🔥 Import des composants
-import FloatInput from "../../../components/ui/FloatInput";
-import FloatSelect from "../../../components/ui/FloatSelect";
 
 const CHART_DATA = [55, 30, 85, 45, 95, 60, 75, 50, 80, 40, 65, 90];
 const MONTHS = [
@@ -39,12 +31,6 @@ const MONTHS = [
 export default function AdminOverview({ setActiveTab }) {
   const { db } = useAuth();
 
-  // 🔥 États pour les filtres
-  const [period, setPeriod] = useState("month");
-  const [chartType, setChartType] = useState("revenue");
-  const [searchOrders, setSearchOrders] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-
   const pendingKyc =
     db.kycRequests?.filter((k) => k.status === "PENDING").length || 0;
   const totalOrders = db.orders?.length || 0;
@@ -61,18 +47,6 @@ export default function AdminOverview({ setActiveTab }) {
       ?.filter((o) => o.type === "MARKETPLACE")
       .reduce((s, o) => s + (o.price || 0), 0) || 0;
 
-  // 🔥 Filtrage des commandes
-  const filteredOrders = (db.orders || [])
-    .filter((o) => {
-      const matchSearch =
-        !searchOrders ||
-        o.product?.toLowerCase().includes(searchOrders.toLowerCase()) ||
-        o.id?.toLowerCase().includes(searchOrders.toLowerCase());
-      const matchStatus = statusFilter === "all" || o.status === statusFilter;
-      return matchSearch && matchStatus;
-    })
-    .slice(0, 5);
-
   const stats = [
     {
       label: "Chiffre d'affaires",
@@ -86,16 +60,16 @@ export default function AdminOverview({ setActiveTab }) {
     {
       label: "Ventes Marketplace",
       value: formatCurrency(mkRevenue),
-      change: "+8.2%",
+      change: `${activeItems} produits actifs`,
       icon: ShoppingCart,
       color: "text-blue-400",
       bg: "bg-blue-500/10",
       onClick: () => setActiveTab("marketplace"),
     },
     {
-      label: "Colis en sourcing",
-      value: String(activeOrders),
-      change: "En cours",
+      label: "Commandes totales",
+      value: String(totalOrders),
+      change: `${activeOrders} en cours`,
       icon: Package,
       color: "text-[#D4AF37]",
       bg: "bg-[#D4AF37]/10",
@@ -195,35 +169,11 @@ export default function AdminOverview({ setActiveTab }) {
                 Flux de marchandises mensuel
               </p>
             </div>
-
-            {/* 🔥 Filtres du graphique */}
-            <div className="flex items-center gap-3">
-              <div className="w-36">
-                <FloatSelect
-                  label="Période"
-                  value={period}
-                  onChange={setPeriod}
-                  options={[
-                    { value: "month", label: "Ce mois" },
-                    { value: "quarter", label: "Ce trimestre" },
-                    { value: "year", label: "Cette année" },
-                  ]}
-                  icon={Calendar}
-                />
-              </div>
-              <div className="w-36">
-                <FloatSelect
-                  label="Type"
-                  value={chartType}
-                  onChange={setChartType}
-                  options={[
-                    { value: "revenue", label: "Chiffre d'affaires" },
-                    { value: "orders", label: "Commandes" },
-                    { value: "users", label: "Inscriptions" },
-                  ]}
-                  icon={BarChart}
-                />
-              </div>
+            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full">
+              <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse" />
+              <span className="text-[9px] font-black uppercase text-gray-400">
+                Live
+              </span>
             </div>
           </div>
 
@@ -297,72 +247,43 @@ export default function AdminOverview({ setActiveTab }) {
 
       {/* Dernières commandes */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs font-black text-white uppercase tracking-widest">
             Commandes récentes
           </h2>
-
-          {/* 🔥 Barre de recherche + filtre */}
-          <div className="flex items-center gap-3">
-            <div className="w-64">
-              <FloatInput
-                label="Rechercher une commande..."
-                value={searchOrders}
-                onChange={(e) => setSearchOrders(e.target.value)}
-                icon={Search}
-                size="sm"
-              />
-            </div>
-            <div className="w-40">
-              <FloatSelect
-                label="Statut"
-                value={statusFilter}
-                onChange={setStatusFilter}
-                options={[
-                  { value: "all", label: "Tous" },
-                  { value: "EN_TRANSIT", label: "En transit" },
-                  { value: "SOURCING", label: "Sourcing" },
-                  { value: "EN_ATTENTE", label: "En attente" },
-                  { value: "LIVRE", label: "Livré" },
-                ]}
-                icon={Filter}
-              />
-            </div>
-          </div>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest hover:underline"
+          >
+            Voir tout →
+          </button>
         </div>
-
         <div className="space-y-2">
-          {filteredOrders.length === 0 ? (
-            <div className="text-center py-8 text-gray-600 text-sm">
-              Aucune commande trouvée
-            </div>
-          ) : (
-            filteredOrders.map((o) => (
-              <div
-                key={o.id}
-                className="flex items-center justify-between bg-[#111112] border border-white/5 rounded-xl px-3 py-2.5 hover:border-white/10 transition-colors gap-2"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center flex-shrink-0">
-                    <Package size={12} className="text-[#D4AF37]" />
+          {(db.orders || []).slice(0, 5).map((o) => (
+            <div
+              key={o.id}
+              className="flex items-center justify-between bg-[#111112] border border-white/5 rounded-xl px-3 py-2.5 hover:border-white/10 transition-colors gap-2"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center flex-shrink-0">
+                  <Package size={12} className="text-[#D4AF37]" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-black text-white truncate">
+                    {o.product}
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-black text-white truncate">
-                      {o.product}
-                    </div>
-                    <div className="text-[9px] text-gray-600 truncate">
-                      {o.id}
-                    </div>
+                  <div className="text-[9px] text-gray-600 truncate">
+                    {o.id}
                   </div>
                 </div>
-                <span
-                  className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded border flex-shrink-0 ${statusColors[o.status] || "text-gray-400 bg-white/5 border-white/10"}`}
-                >
-                  {o.status?.replace(/_/g, " ")}
-                </span>
               </div>
-            ))
-          )}
+              <span
+                className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded border flex-shrink-0 ${statusColors[o.status] || "text-gray-400 bg-white/5 border-white/10"}`}
+              >
+                {o.status?.replace(/_/g, " ")}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </main>
