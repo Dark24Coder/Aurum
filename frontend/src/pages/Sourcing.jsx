@@ -18,9 +18,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import FloatInput from "../components/ui/FloatInput";
+import { useToast } from "../components/ui/useToast";
 
 const Sourcing = ({ currentUser }) => {
   const navigate = useNavigate();
+  const { toast, ToastContainer } = useToast();
   const [activeTab, setActiveTab] = useState("sourcing");
   const [animatingTab, setAnimatingTab] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,10 +48,8 @@ const Sourcing = ({ currentUser }) => {
   const handleProcess = (e) => {
     e.preventDefault();
     if (!currentUser) {
-      alert(
-        "Accès restreint : Veuillez vous connecter pour soumettre une demande.",
-      );
-      navigate("/login");
+      toast.warning("Connectez-vous pour soumettre une demande.");
+      setTimeout(() => navigate("/login"), 1800);
       return;
     }
     setLoading(true);
@@ -58,6 +58,7 @@ const Sourcing = ({ currentUser }) => {
 
   return (
     <main className="min-h-screen bg-[#0A0A0B] pt-32 pb-20 px-4">
+      {ToastContainer}
       <div className="max-w-6xl mx-auto">
         {/* --- HEADER --- */}
         <div className="text-center mb-16 animate-fade-in-up">

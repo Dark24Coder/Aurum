@@ -2,9 +2,8 @@
 import { useState } from "react";
 import { Package, Search, X } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
+import { useToast } from "../../../components/ui/useToast";
 import { formatCurrency } from "../../../utils/constants";
-
-// 🔥 Import des composants
 import FloatInput from "../../../components/ui/FloatInput";
 import FloatSelect from "../../../components/ui/FloatSelect";
 
@@ -16,14 +15,6 @@ const ORDER_STATUSES = [
   { value: "EN_TRANSIT", label: "En Transit" },
   { value: "LIVRE", label: "Livré" },
   { value: "ANNULE", label: "Annulé" },
-];
-
-// 🔥 Options pour le filtre type
-const TYPE_OPTIONS = [
-  { value: "ALL", label: "Tous types" },
-  { value: "SOURCING", label: "Sourcing" },
-  { value: "MARKETPLACE", label: "Marketplace" },
-  { value: "GROUPAGE", label: "Groupage" },
 ];
 
 const STATUS_STYLES = {
@@ -55,8 +46,26 @@ function StatusBadge({ status }) {
 
 export default function ManageOrders() {
   const { db, adminUpdateOrderStatus } = useAuth();
+  const { toast, ToastContainer } = useToast();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("ALL");
+
+  const STATUS_LABELS = {
+    EN_ATTENTE: "En attente",
+    SOURCING: "Sourcing",
+    CONTROLE_QUALITE: "Contrôle qualité",
+    EXPEDIE: "Expédié",
+    EN_TRANSIT: "En transit",
+    LIVRE: "Livré",
+    ANNULE: "Annulé",
+  };
+
+  const handleStatusChange = (orderId, newStatus, productName) => {
+    adminUpdateOrderStatus(orderId, newStatus);
+    toast.success(
+      `"${productName}" → ${STATUS_LABELS[newStatus] || newStatus}`,
+    );
+  };
 
   const orders = db.orders || [];
 
@@ -72,28 +81,45 @@ export default function ManageOrders() {
 
   return (
     <main className="space-y-6">
-      {/* 🔥 Barre filtre + recherche avec FloatInput */}
+      {ToastContainer}
+
+      {/* Barre filtre + recherche */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* Recherche avec FloatInput */}
+        {/* Recherche FloatInput */}
         <div className="flex-1">
           <FloatInput
             label="Rechercher par ID, produit ou tracking…"
-            name="search"
+            icon={Search}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            icon={Search}
+            rightElement={
+              search ? (
+                <button
+                  onClick={() => setSearch("")}
+                  className="text-gray-500 hover:text-white transition"
+                >
+                  <X size={13} />
+                </button>
+              ) : null
+            }
           />
         </div>
 
-        {/* 🔥 Filtre type avec FloatSelect */}
-        <div className="w-56">
-          <FloatSelect
-            label="Type de commande"
-            value={filterType}
-            onChange={setFilterType}
-            options={TYPE_OPTIONS}
-            icon={Package}
-          />
+        {/* Filtre type */}
+        <div className="flex gap-2">
+          {["ALL", "SOURCING", "MARKETPLACE", "GROUPAGE"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setFilterType(t)}
+              className={`px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                filterType === t
+                  ? "bg-[#D4AF37] text-black"
+                  : "bg-[#111112] border border-white/10 text-gray-400 hover:text-white"
+              }`}
+            >
+              {t === "ALL" ? "Tout" : t}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -150,21 +176,20 @@ export default function ManageOrders() {
                   </div>
                 </div>
 
-                {/* Contrôles avec FloatSelect */}
+                {/* Contrôles */}
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <StatusBadge status={o.status} />
-
-                  {/* FloatSelect pour changer le statut */}
-                  <div className="w-48">
+                  <div className="w-44">
                     <FloatSelect
                       label="Statut"
                       value={o.status}
-                      onChange={(newStatus) => {
-                        adminUpdateOrderStatus(o.id, newStatus);
-                      }}
-                      options={ORDER_STATUSES}
-                      icon={Package}
-                      required
+                      onChange={(val) =>
+                        handleStatusChange(o.id, val, o.product)
+                      }
+                      options={ORDER_STATUSES.map((s) => ({
+                        value: s.value,
+                        label: s.label,
+                      }))}
                     />
                   </div>
                 </div>

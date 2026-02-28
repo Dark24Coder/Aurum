@@ -17,56 +17,20 @@ import {
   Sparkles,
   Info,
   Lock,
+  Smartphone,
+  Shirt,
+  Utensils,
+  Car,
 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
+import { useToast } from "../components/ui/useToast";
+import FloatInput from "../components/ui/FloatInput";
 
 const COMMISSION_RATE = 0.01;
 const formatCurrency = (n) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "XOF" }).format(
     n,
   );
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
-function Toast({ toast, onClose }) {
-  if (!toast) return null;
-  const styles = {
-    success: "bg-green-500/20 border-green-500/40 text-green-300",
-    error: "bg-red-500/20   border-red-500/40   text-red-300",
-    info: "bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]",
-  };
-  return (
-    <main
-      className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-5 py-3.5 rounded-2xl border backdrop-blur-xl shadow-2xl ${styles[toast.type || "info"]}`}
-      style={{
-        animation: "toastIn .3s cubic-bezier(.34,1.4,.64,1) forwards",
-        minWidth: "280px",
-        maxWidth: "90vw",
-      }}
-    >
-      <style>{`@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}`}</style>
-      {toast.type === "success" && (
-        <CheckCircle size={16} className="flex-shrink-0" />
-      )}
-      {toast.type === "error" && <X size={16} className="flex-shrink-0" />}
-      {toast.type === "info" && <Info size={16} className="flex-shrink-0" />}
-      <span className="text-sm font-bold flex-1">{toast.message}</span>
-      {toast.link && (
-        <Link
-          to={toast.link.to}
-          className="text-[10px] font-black uppercase tracking-widest underline opacity-80 hover:opacity-100 flex-shrink-0"
-        >
-          {toast.link.label}
-        </Link>
-      )}
-      <button
-        onClick={onClose}
-        className="opacity-50 hover:opacity-100 transition-opacity flex-shrink-0"
-      >
-        <X size={14} />
-      </button>
-    </main>
-  );
-}
 
 // ── StatusBadge ───────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
@@ -317,15 +281,10 @@ export default function GalerieMarketplace() {
     registerStockAlert,
     MARKETPLACE_CATEGORIES,
   } = useAuth();
+  const { toast, ToastContainer } = useToast();
   const [activeCategory, setActiveCategory] = useState("TOUT");
   const [searchQuery, setSearchQuery] = useState("");
   const [alertedItems, setAlertedItems] = useState(new Set());
-  const [toast, setToast] = useState(null);
-
-  const showToast = (message, type = "info", link = null) => {
-    setToast({ message, type, link });
-    setTimeout(() => setToast(null), 4000);
-  };
 
   const filteredItems = (db.marketplace || []).filter((item) => {
     const catMatch =
@@ -341,51 +300,48 @@ export default function GalerieMarketplace() {
 
   const handleBuy = (item, finalPrice, promo) => {
     if (!isAuthenticated) {
-      showToast("Vous devez être connecté pour acheter.", "error", {
-        to: "/login",
-        label: "Se connecter →",
-      });
+      toast.error("Connectez-vous pour acheter.");
       return;
     }
     const result = handleMarketplaceBuy({ ...item, price: finalPrice });
     if (result.needsLogin) {
-      showToast("Connexion requise.", "error", {
-        to: "/login",
-        label: "Se connecter →",
-      });
+      toast.error("Connexion requise.");
       return;
     }
     if (result.needsKyc) {
-      showToast("KYC requis avant d'acheter.", "error", {
-        to: "/dashboard/user",
-        label: "Vérifier →",
-      });
+      toast.warning(
+        "KYC requis avant d'acheter — rendez-vous dans votre espace.",
+      );
       return;
     }
     if (promo) promo.markUsed?.();
-    showToast(
+    toast.success(
       `Commande pour "${item.name}" créée !${promo ? ` (Code ${promo.code} appliqué)` : ""}`,
-      "success",
     );
   };
 
   const handleAlert = (item) => {
     if (!isAuthenticated) {
-      showToast("Connectez-vous pour être alerté.", "error", {
-        to: "/login",
-        label: "Se connecter →",
-      });
+      toast.error("Connectez-vous pour être alerté.");
       return;
     }
     const result = registerStockAlert(item.id);
     if (result.success) {
       setAlertedItems((prev) => new Set([...prev, item.id]));
-      showToast(`Alerte enregistrée pour "${item.name}" !`, "success");
+      toast.success(`Alerte enregistrée pour "${item.name}" !`);
     }
   };
 
   const categories = MARKETPLACE_CATEGORIES || [
-    { id: "TOUT", label: "Tout", icon: "📦" },
+    { id: "TOUT", label: "Tout", icon: <Package size={14} /> },
+    {
+      id: "ELECTRONIQUE",
+      label: "Électronique",
+      icon: <Smartphone size={14} />,
+    },
+    { id: "MODE", label: "Mode & Beauté", icon: <Shirt size={14} /> },
+    { id: "MAISON", label: "Maison & Cuisine", icon: <Utensils size={14} /> },
+    { id: "AUTO", label: "Auto & Moto", icon: <Car size={14} /> },
   ];
 
   return (
@@ -439,26 +395,23 @@ export default function GalerieMarketplace() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8">
         {/* Recherche */}
-        <div className="relative mb-6">
-          <Search
-            size={15}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-          />
-          <input
-            type="text"
-            placeholder="Rechercher un produit…"
+        <div className="mb-6">
+          <FloatInput
+            label="Rechercher un produit…"
+            icon={Search}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#111112] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-[#D4AF37]/40 transition-colors"
+            rightElement={
+              searchQuery ? (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-gray-500 hover:text-white transition"
+                >
+                  <X size={14} />
+                </button>
+              ) : null
+            }
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
-            >
-              <X size={14} />
-            </button>
-          )}
         </div>
 
         {/* Filtres catégorie */}
@@ -597,7 +550,7 @@ export default function GalerieMarketplace() {
         )}
       </div>
 
-      <Toast toast={toast} onClose={() => setToast(null)} />
+      {ToastContainer}
     </main>
   );
 }

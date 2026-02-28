@@ -18,6 +18,7 @@ import {
 import FloatInput from "../../../components/ui/FloatInput";
 import FloatSelect from "../../../components/ui/FloatSelect";
 import { useConfirm } from "../../../components/ui/useConfirm";
+import { useToast } from "../../../components/ui/useToast";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "XOF" }).format(
@@ -365,6 +366,7 @@ function GroupageRow({ grp, onStatusChange, onDelete, participants }) {
 export default function ManageGroupages() {
   const { db, setDb } = useAuth();
   const { confirm, ConfirmDialog } = useConfirm();
+  const { toast, ToastContainer } = useToast();
   const [showModal, setShowModal] = useState(false);
 
   const groupages = db.groupages || [];
@@ -373,13 +375,21 @@ export default function ManageGroupages() {
   const addGroupage = (g) =>
     setDb((prev) => ({ ...prev, groupages: [g, ...(prev.groupages || [])] }));
 
-  const changeStatus = (id, status) =>
+  const changeStatus = (id, status) => {
     setDb((prev) => ({
       ...prev,
       groupages: prev.groupages.map((g) =>
         g.id === id ? { ...g, status } : g,
       ),
     }));
+    const labels = {
+      OUVERT: "Ouvert",
+      FERME: "Fermé",
+      EN_COURS: "En cours",
+      ARRIVE: "Arrivé",
+    };
+    toast.info(`Statut mis à jour : ${labels[status] || status}`);
+  };
 
   const deleteGroupage = async (id, name) => {
     const ok = await confirm({
@@ -393,6 +403,7 @@ export default function ManageGroupages() {
       ...prev,
       groupages: prev.groupages.filter((g) => g.id !== id),
     }));
+    toast.success("Groupage supprimé.");
   };
 
   const getParticipants = (grpId) =>
@@ -406,6 +417,7 @@ export default function ManageGroupages() {
   return (
     <main className="space-y-6">
       {ConfirmDialog}
+      {ToastContainer}
       {/* Stats + bouton */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">

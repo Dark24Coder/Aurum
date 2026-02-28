@@ -8,13 +8,14 @@ import {
   Save,
   Eye,
   EyeOff,
-  Check,
 } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
 import FloatInput from "../../../components/ui/FloatInput";
+import { useToast } from "../../../components/ui/useToast";
 
 export default function Settings() {
   const { currentUser, updateProfile } = useAuth();
+  const { toast, ToastContainer } = useToast();
 
   const [profileForm, setProfileForm] = useState({
     name: currentUser?.name || "",
@@ -22,7 +23,6 @@ export default function Settings() {
     password: "",
   });
   const [showPwd, setShowPwd] = useState(false);
-  const [profileSaved, setProfileSaved] = useState(false);
 
   const [econForm, setEconForm] = useState({
     dollarRate: "650",
@@ -30,21 +30,18 @@ export default function Settings() {
     commission: "1",
     maintenance: false,
   });
-  const [econSaved, setEconSaved] = useState(false);
-
   const handleProfileSave = async () => {
     await updateProfile(profileForm);
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 2500);
+    toast.success("Profil mis à jour !");
   };
 
   const handleEconSave = () => {
-    setEconSaved(true);
-    setTimeout(() => setEconSaved(false), 2500);
+    toast.success("Configuration enregistrée !");
   };
 
   return (
     <main className="space-y-6 pb-10">
+      {ToastContainer}
       {/* ── Profil Admin ── */}
       <section className="bg-[#111112] border border-[#D4AF37]/20 rounded-2xl p-6 sm:p-8 space-y-6">
         <div className="flex items-center gap-3 border-b border-white/5 pb-5">
@@ -120,19 +117,9 @@ export default function Settings() {
 
         <button
           onClick={handleProfileSave}
-          className={`w-full py-3.5 rounded-xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 transition-all ${
-            profileSaved
-              ? "bg-green-500 text-white"
-              : "bg-[#D4AF37] text-black hover:opacity-90"
-          }`}
+          className="w-full py-3.5 rounded-xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 transition-all bg-[#D4AF37] text-black hover:opacity-90"
         >
-          {profileSaved ? (
-            <>
-              <Check size={15} /> Enregistré
-            </>
-          ) : (
-            "Mettre à jour mon profil"
-          )}
+          Mettre à jour mon profil
         </button>
       </section>
 
@@ -207,21 +194,9 @@ export default function Settings() {
 
         <button
           onClick={handleEconSave}
-          className={`w-full py-3.5 rounded-xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 border transition-all ${
-            econSaved
-              ? "bg-green-500 border-green-500 text-white"
-              : "border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black"
-          }`}
+          className="w-full py-3.5 rounded-xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 border transition-all border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black"
         >
-          {econSaved ? (
-            <>
-              <Check size={15} /> Enregistré
-            </>
-          ) : (
-            <>
-              <Save size={15} /> Enregistrer la configuration
-            </>
-          )}
+          <Save size={15} /> Enregistrer la configuration
         </button>
       </section>
     </main>

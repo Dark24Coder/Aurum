@@ -1,7 +1,6 @@
 // src/pages/Groupage.jsx
 // ✅ Page publique /groupage — conteneurs partagés Chine→Afrique
 // ✅ Participation nécessite connexion + KYC + caution
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Users,
@@ -19,6 +18,7 @@ import {
   Coins,
 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
+import { useToast } from "../components/ui/useToast";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "XOF" }).format(
@@ -213,28 +213,23 @@ const STEPS = [
 export default function GroupagePage() {
   const { isAuthenticated, currentUser, db, setDb } = useAuth();
   const navigate = useNavigate();
-  const [toast, setToast] = useState(null);
+  const { toast, ToastContainer } = useToast();
 
   const groupages = db.groupages || [];
 
-  const showToast = (msg, type = "info") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 4000);
-  };
-
   const handleJoin = (grp) => {
     if (!isAuthenticated) {
-      showToast("Connectez-vous pour rejoindre un groupage.", "error");
+      toast.error("Connectez-vous pour rejoindre un groupage.");
       setTimeout(() => navigate("/login"), 1200);
       return;
     }
     if (currentUser?.kycStatus !== "VALID") {
-      showToast("KYC requis — validez votre identité d'abord.", "error");
+      toast.error("KYC requis — validez votre identité d'abord.");
       setTimeout(() => navigate("/dashboard/user"), 1200);
       return;
     }
     if (!currentUser?.depositPaid) {
-      showToast("Caution requise avant de participer.", "error");
+      toast.error("Caution requise avant de participer.");
       setTimeout(() => navigate("/dashboard/user"), 1200);
       return;
     }
@@ -244,7 +239,7 @@ export default function GroupagePage() {
       (o) => o.groupageId === grp.id && o.userId === currentUser.uid,
     );
     if (already) {
-      showToast("Vous avez déjà rejoint ce groupage.", "info");
+      toast.info("Vous avez déjà rejoint ce groupage.");
       return;
     }
 
@@ -270,7 +265,7 @@ export default function GroupagePage() {
       orders: [newOrder, ...(prev.orders || [])],
     }));
 
-    showToast(`Participation enregistrée pour "${grp.name}" !`, "success");
+    toast.success(`Participation enregistrée pour "${grp.name}" !`);
   };
 
   const open = groupages.filter(
@@ -287,23 +282,7 @@ export default function GroupagePage() {
 
   return (
     <main className="min-h-screen bg-[#0A0A0B] pb-24">
-      {/* Toast */}
-      {toast && (
-        <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3.5 rounded-2xl border backdrop-blur-xl shadow-2xl flex items-center gap-3 text-sm font-bold ${
-            toast.type === "success"
-              ? "bg-green-500/20 border-green-500/40 text-green-300"
-              : toast.type === "error"
-                ? "bg-red-500/20 border-red-500/40 text-red-300"
-                : "bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]"
-          }`}
-          style={{ minWidth: 280, maxWidth: "90vw" }}
-        >
-          {toast.type === "success" && <CheckCircle size={16} />}
-          {toast.type === "error" && <AlertCircle size={16} />}
-          {toast.msg}
-        </div>
-      )}
+      {ToastContainer}
 
       {/* ── Hero ── */}
       <div className="relative overflow-hidden border-b border-white/5">

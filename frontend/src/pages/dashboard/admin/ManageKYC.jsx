@@ -1,6 +1,7 @@
 // src/pages/dashboard/admin/ManageKYC.jsx
 import { useState } from "react";
 import { CheckCircle, X, Eye, ShieldCheck, Clock, User } from "lucide-react";
+import { useToast } from "../../../components/ui/useToast";
 import { useAuth } from "../../../context/useAuth";
 
 const STATUS_STYLES = {
@@ -106,6 +107,7 @@ function DocModal({ req, onClose }) {
 
 export default function ManageKYC() {
   const { db, adminUpdateKyc } = useAuth();
+  const { toast, ToastContainer } = useToast();
   const [detailReq, setDetailReq] = useState(null);
   const [filter, setFilter] = useState("ALL");
 
@@ -121,8 +123,16 @@ export default function ManageKYC() {
     (k) => k.status === "REJECTED",
   ).length;
 
+  const handleKyc = (id, status) => {
+    adminUpdateKyc(id, status);
+    if (status === "VALID") toast.success("Dossier KYC validé avec succès !");
+    if (status === "REJECTED") toast.warning("Dossier KYC rejeté.");
+  };
+
   return (
     <main className="space-y-6">
+      {ToastContainer}
+
       {/* Compteurs rapides */}
       <div className="grid grid-cols-3 gap-3">
         {[
@@ -247,14 +257,14 @@ export default function ManageKYC() {
                         {k.status === "PENDING" && (
                           <>
                             <button
-                              onClick={() => adminUpdateKyc(k.id, "VALID")}
+                              onClick={() => handleKyc(k.id, "VALID")}
                               className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all"
                               title="Valider"
                             >
                               <CheckCircle size={14} />
                             </button>
                             <button
-                              onClick={() => adminUpdateKyc(k.id, "REJECTED")}
+                              onClick={() => handleKyc(k.id, "REJECTED")}
                               className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all"
                               title="Rejeter"
                             >

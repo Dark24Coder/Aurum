@@ -18,6 +18,9 @@ import {
 import { useAuth } from "../../../context/useAuth";
 import { formatCurrency, generateId } from "../../../utils/constants";
 import { useConfirm } from "../../../components/ui/useConfirm";
+import { useToast } from "../../../components/ui/useToast";
+import FloatInput from "../../../components/ui/FloatInput";
+import FloatSelect from "../../../components/ui/FloatSelect";
 
 const CATEGORIES_LIST = ["ELECTRONIQUE", "MODE", "MAISON", "AUTO"];
 const FILTER_CATS = ["TOUT", ...CATEGORIES_LIST];
@@ -155,12 +158,11 @@ function ProductModal({ initial, onClose, onSave, title }) {
                   (optionnel)
                 </span>
               </label>
-              <input
+              <FloatInput
+                label="URL de l'image (optionnel)"
                 type="url"
-                placeholder="https://images.unsplash.com/..."
                 value={form.img.startsWith("data:") ? "" : form.img}
                 onChange={(e) => handleUrlChange(e.target.value)}
-                className={inputCls}
               />
             </div>
           ) : (
@@ -194,50 +196,32 @@ function ProductModal({ initial, onClose, onSave, title }) {
           )}
 
           {/* Nom */}
-          <div>
-            <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
-              Nom du produit *
-            </label>
-            <input
-              type="text"
-              placeholder="Ex: AirPods Pro 2"
-              value={form.name}
-              onChange={(e) => change("name", e.target.value)}
-              className={inputCls}
-            />
-          </div>
+          <FloatInput
+            label="Nom du produit"
+            value={form.name}
+            onChange={(e) => change("name", e.target.value)}
+            required
+          />
 
           {/* Catégorie + Prix */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
-                Catégorie *
-              </label>
-              <select
-                value={form.category}
-                onChange={(e) => change("category", e.target.value)}
-                className={inputCls + " cursor-pointer bg-[#0A0A0B]"}
-              >
-                {CATEGORIES_LIST.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block">
-                Prix (FCFA) *
-              </label>
-              <input
-                type="number"
-                min="0"
-                placeholder="Ex: 35000"
-                value={form.price}
-                onChange={(e) => change("price", e.target.value)}
-                className={inputCls}
-              />
-            </div>
+            <FloatSelect
+              label="Catégorie"
+              value={form.category}
+              onChange={(val) => change("category", val)}
+              options={CATEGORIES_LIST.map((cat) => ({
+                value: cat,
+                label: cat,
+              }))}
+              required
+            />
+            <FloatInput
+              label="Prix (FCFA)"
+              type="number"
+              value={form.price}
+              onChange={(e) => change("price", e.target.value)}
+              required
+            />
           </div>
 
           {/* Description */}
@@ -306,6 +290,7 @@ function ProductModal({ initial, onClose, onSave, title }) {
 export default function ManageMarket() {
   const { db, setDb } = useAuth();
   const { confirm, ConfirmDialog } = useConfirm();
+  const { toast, ToastContainer } = useToast();
   const [search, setSearch] = useState("");
   const [catFilter, setCat] = useState("TOUT");
   const [showAdd, setShowAdd] = useState(false);
@@ -321,14 +306,19 @@ export default function ManageMarket() {
   });
 
   const toggleStatus = (id) => {
+    const item = (db.marketplace || []).find((i) => i.id === id);
+    const newStatus = item?.status === "ACTIVE" ? "RUPTURE" : "ACTIVE";
     setDb((prev) => ({
       ...prev,
-      marketplace: prev.marketplace.map((item) =>
-        item.id === id
-          ? { ...item, status: item.status === "ACTIVE" ? "RUPTURE" : "ACTIVE" }
-          : item,
+      marketplace: prev.marketplace.map((i) =>
+        i.id === id ? { ...i, status: newStatus } : i,
       ),
     }));
+    toast.info(
+      newStatus === "ACTIVE"
+        ? `"${item?.name}" remis en stock.`
+        : `"${item?.name}" passé en rupture.`,
+    );
   };
 
   const deleteItem = async (id, name) => {
@@ -343,6 +333,7 @@ export default function ManageMarket() {
       ...prev,
       marketplace: prev.marketplace.filter((i) => i.id !== id),
     }));
+    toast.success(`"${name}" supprimé.`);
   };
 
   const addProduct = (data) => {
@@ -353,6 +344,8 @@ export default function ManageMarket() {
         ...prev.marketplace,
       ],
     }));
+    setShowAdd(false);
+    toast.success(`"${data.name}" ajouté au marketplace.`);
   };
 
   const updateProduct = (data) => {
@@ -362,6 +355,7 @@ export default function ManageMarket() {
         i.id === editItem.id ? { ...i, ...data } : i,
       ),
     }));
+    toast.success(`"${data.name}" mis à jour.`);
     setEditItem(null);
   };
 
@@ -371,6 +365,7 @@ export default function ManageMarket() {
   return (
     <main className="space-y-6">
       {ConfirmDialog}
+      {ToastContainer}
 
       {/* Stats + bouton ajout */}
       <div className="flex items-start justify-between gap-4 flex-wrap">

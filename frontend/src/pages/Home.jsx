@@ -331,6 +331,7 @@ function FloatSelect({
   required = false,
   icon: Icon,
   scrollContainerRef,
+  onOpenChange,
 }) {
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -341,10 +342,15 @@ function FloatSelect({
   const isFloating = focused || open || (value && value.length > 0);
   const selectedLabel = options.find((o) => o.value === value)?.label || "";
 
+  const setOpenAndNotify = (v) => {
+    setOpen(v);
+    onOpenChange?.(v);
+  };
+
   useEffect(() => {
     const h = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) {
-        setOpen(false);
+        setOpenAndNotify(false);
         setFocused(false);
       }
     };
@@ -379,7 +385,7 @@ function FloatSelect({
         ref={triggerRef}
         onClick={() => {
           updatePos();
-          setOpen((v) => !v);
+          setOpenAndNotify(!open);
           setFocused(true);
         }}
         className={`relative flex items-center bg-black/40 border rounded-xl cursor-pointer transition-all duration-300 ${open ? "border-[#D4AF37]/60 shadow-[0_0_15px_rgba(212,175,55,0.08)]" : "border-white/10"}`}
@@ -433,7 +439,7 @@ function FloatSelect({
                     key={opt.value}
                     onClick={() => {
                       onChange(opt.value);
-                      setOpen(false);
+                      setOpenAndNotify(false);
                       setFocused(false);
                     }}
                     className={`flex items-center justify-between px-4 py-3 text-sm cursor-pointer transition-all ${value === opt.value ? "bg-[#D4AF37]/10 text-[#D4AF37] font-bold" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
@@ -612,6 +618,7 @@ export default function Home() {
 
   // Ref du conteneur scrollable du modal simulateur — passée au FloatSelect
   const simScrollRef = useRef(null);
+  const [selectDropOpen, setSelectDropOpen] = useState(false);
 
   const rate = SHIPPING_RATES.find((r) => r.id === category);
   const isUnit = rate?.unit === "Unité";
@@ -945,7 +952,8 @@ export default function Home() {
 
             {/* Conteneur scrollable — ref transmise au FloatSelect */}
             <div
-              className="overflow-y-auto custom-scroll flex-1"
+              className="custom-scroll flex-1"
+              style={{ overflowY: selectDropOpen ? "hidden" : "auto" }}
               ref={simScrollRef}
             >
               <div className="p-4 sm:p-6">
@@ -977,6 +985,7 @@ export default function Home() {
                         options={categoryOptions}
                         icon={Package}
                         scrollContainerRef={simScrollRef}
+                        onOpenChange={setSelectDropOpen}
                       />
                     )}
 

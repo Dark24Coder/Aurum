@@ -15,6 +15,7 @@ import {
 import { useAuth } from "../../../context/useAuth";
 import FloatInput from "../../../components/ui/FloatInput";
 import FloatSelect from "../../../components/ui/FloatSelect";
+import { useToast } from "../../../components/ui/useToast";
 
 const KYC_STYLES = {
   VALID: "text-green-400  bg-green-500/10  border-green-500/20",
@@ -216,6 +217,7 @@ function UserCard({ u, onDelete }) {
 
 export default function UsersAdmin() {
   const { db, setDb } = useAuth();
+  const { toast, ToastContainer } = useToast();
   const [search, setSearch] = useState("");
   const [roleFilter, setRole] = useState("ALL");
   const [kycFilter, setKyc] = useState("ALL");
@@ -243,14 +245,14 @@ export default function UsersAdmin() {
 
   const confirmDelete = () => {
     if (!toDelete) return;
-    // Retirer de db.users si présent
+    const name = toDelete.name || toDelete.email;
     setDb?.((prev) => ({
       ...prev,
       users: (prev.users || []).filter((u) => u.uid !== toDelete.uid),
     }));
-    // Marquer comme supprimé localement (pour les mocks)
     setDeletedIds((prev) => new Set([...prev, toDelete.uid]));
     setToDelete(null);
+    toast.success(`Utilisateur "${name}" supprimé.`);
   };
 
   const totalClients = allUsers.filter((u) => u.role === "CLIENT").length;
@@ -259,6 +261,7 @@ export default function UsersAdmin() {
 
   return (
     <main className="space-y-6">
+      {ToastContainer}
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[

@@ -19,9 +19,11 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import FloatInput from "../components/ui/FloatInput";
 import FloatSelect from "../components/ui/FloatSelect";
+import { useToast } from "../components/ui/useToast";
 
 const Marketplace = ({ currentUser }) => {
   const navigate = useNavigate();
+  const { toast, ToastContainer } = useToast();
 
   // --- ÉTATS ---
   const [category, setCategory] = useState("Tous");
@@ -31,7 +33,6 @@ const Marketplace = ({ currentUser }) => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [sortValue, setSortValue] = useState("new");
   const [priceRange, setPriceRange] = useState(200000000);
-  const [alert, setAlert] = useState({ show: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -175,17 +176,13 @@ const Marketplace = ({ currentUser }) => {
 
   const handleAction = () => {
     if (!selectedProduct.isAvailable) {
-      setAlert({
-        show: true,
-        message: "Alerte de retour en stock enregistrée !",
-      });
-      setTimeout(() => setAlert({ show: false, message: "" }), 3000);
+      toast.success("Alerte de retour en stock enregistrée !");
       setShowDetailModal(false);
       return;
     }
     if (!currentUser) {
-      setAlert({ show: true, message: "Connexion requise pour l'achat..." });
-      setTimeout(() => navigate("/login"), 2000);
+      toast.warning("Connexion requise — redirection...");
+      setTimeout(() => navigate("/login"), 1800);
     } else {
       navigate("/dashboard/orders");
     }
@@ -193,24 +190,7 @@ const Marketplace = ({ currentUser }) => {
 
   return (
     <main className="min-h-screen bg-[#0A0A0B] pt-32 pb-20 px-4 text-white">
-      {/* TOAST */}
-      <div
-        className={`fixed top-10 left-1/2 -translate-x-1/2 z-[500] transition-all duration-500 ${alert.show ? "translate-y-0 opacity-100" : "-translate-y-12 opacity-0 pointer-events-none"}`}
-      >
-        <div className="bg-[#161617] border border-[#D4AF37]/50 backdrop-blur-xl px-8 py-4 rounded-2xl flex items-center gap-4 shadow-2xl">
-          <div className="bg-[#D4AF37] p-1.5 rounded-lg">
-            <Lock size={16} className="text-black" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-white text-[10px] font-black uppercase tracking-widest">
-              Aurum Protocol
-            </span>
-            <span className="text-gray-400 text-[10px] uppercase">
-              {alert.message}
-            </span>
-          </div>
-        </div>
-      </div>
+      {ToastContainer}
 
       <div className="max-w-[1400px] mx-auto">
         {/* HEADER */}

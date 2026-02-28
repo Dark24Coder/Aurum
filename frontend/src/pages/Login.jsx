@@ -129,7 +129,6 @@ function Login() {
               </div>
               <span className="text-xs text-gray-400 font-bold group-hover:text-white transition-colors">
                 Se souvenir de moi{" "}
-                <span className="text-gray-600 font-normal">(7 jours)</span>
               </span>
             </label>
 

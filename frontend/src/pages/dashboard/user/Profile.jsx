@@ -1,3 +1,4 @@
+// src/pages/dashboard/user/Profile.jsx
 import React, { useState } from "react";
 import {
   User,
@@ -14,12 +15,14 @@ import {
   Save,
 } from "lucide-react";
 import { useAuth } from "../../../context/useAuth";
+import { useToast } from "../../../components/ui/useToast";
 import { COUNTRIES_DATA } from "../../../utils/constants";
 import FloatInput from "../../../components/ui/FloatInput";
 import FloatSelect from "../../../components/ui/FloatSelect";
 
 const Profile = () => {
   const { currentUser, updateProfile, submitKyc, authLoading } = useAuth();
+  const { toast, ToastContainer } = useToast();
   const [loading, setLoading] = useState(false);
 
   const [profileForm, setProfileForm] = useState({
@@ -54,6 +57,7 @@ const Profile = () => {
     e.preventDefault();
     setLoading(true);
     await updateProfile(profileForm);
+    toast.success("Profil mis à jour avec succès !");
     setLoading(false);
   };
 
@@ -70,6 +74,7 @@ const Profile = () => {
   const handleSubmitKyc = async (e) => {
     e.preventDefault();
     await submitKyc(kycForm);
+    toast.info("Dossier KYC soumis ! En attente de validation.");
   };
 
   const countryOptions = COUNTRIES_DATA.map((c) => ({
@@ -84,7 +89,9 @@ const Profile = () => {
   ];
 
   return (
-    <main className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-2xl mx-auto space-y-8">
+      {ToastContainer}
+
       {/* INFORMATIONS PERSONNELLES */}
       <div>
         <h3 className="text-xl font-black text-white uppercase mb-6 text-center">
@@ -310,13 +317,13 @@ const Profile = () => {
           </form>
         )}
       </div>
-    </main>
+    </div>
   );
 };
 
 function UploadZone({ label, value, onChange, required }) {
   return (
-    <main>
+    <div>
       <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1 mb-1.5 block">
         {label}
       </label>
@@ -338,7 +345,7 @@ function UploadZone({ label, value, onChange, required }) {
           </>
         )}
       </div>
-    </main>
+    </div>
   );
 }
 
